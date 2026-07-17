@@ -1,0 +1,301 @@
+สร้างเว็บแอปพลิเคชันสำหรับใช้งานส่วนตัวชื่อ “GoldIQ” เพื่อใช้ติดตามราคาทองคำจากฮั่วเซ่งเฮง จัดการพอร์ตลงทุนทอง และแจ้งเตือนเมื่อราคาถึงระดับที่กำหนด
+
+Technology Stack
+
+- Frontend: Next.js, React, TypeScript
+- Backend: NestJS, TypeScript
+- Database: PostgreSQL
+- ORM: Prisma
+- Cache และป้องกันการแจ้งเตือนซ้ำ: Redis
+- Scheduler: NestJS Schedule
+- Deployment: Docker และ Docker Compose
+- Notification: เตรียมโครงสร้างให้รองรับ LINE Messaging API และ Telegram
+- UI: Responsive Web Application รองรับ Desktop และ Mobile
+
+แหล่งข้อมูลราคา
+
+ใช้ API ราคาทองของฮั่วเซ่งเฮงดังนี้:
+
+1. ราคาทอง 96.5%
+
+GET https://apicheckpricev3.huasengheng.com/api/values/getprice/
+
+2. ราคาทอง 99.99%
+
+GET https://apigoldprice99.huasengheng.com/api/values
+
+ระบบต้องสร้าง adapter สำหรับแปลง response จาก API ภายนอกให้เป็นโครงสร้างข้อมูลมาตรฐานภายในระบบ โดยห้ามผูก business logic เข้ากับ response structure ของ API โดยตรง
+
+Core Features
+
+1. Gold Price Dashboard
+
+แสดงข้อมูล:
+
+- ราคาทองคำแท่งรับซื้อ
+- ราคาทองคำแท่งขายออก
+- ราคาทองรูปพรรณรับซื้อ
+- ราคาทองรูปพรรณขายออก
+- ราคาทอง 99.99%
+- เวลาที่อัปเดตล่าสุด
+- การเปลี่ยนแปลงเทียบกับราคาก่อนหน้า
+- สถานะราคาเพิ่มขึ้น ลดลง หรือไม่เปลี่ยนแปลง
+
+2. Portfolio Management
+
+ผู้ใช้สามารถบันทึกรายการซื้อทองแต่ละครั้ง โดยเก็บข้อมูล:
+
+- วันที่และเวลาซื้อ
+- ประเภททอง
+- ราคาทอง ณ เวลาซื้อ
+- จำนวนเงินที่ลงทุน
+- น้ำหนักทองที่ได้รับ
+- ค่าธรรมเนียม
+- หมายเหตุ
+
+ระบบต้องคำนวณ:
+
+- เงินลงทุนรวม
+- น้ำหนักทองรวม
+- ต้นทุนเฉลี่ยต่อบาททอง
+- มูลค่าพอร์ตปัจจุบัน โดยใช้ราคารับซื้อ
+- กำไรหรือขาดทุน
+- เปอร์เซ็นต์กำไรหรือขาดทุน
+- ราคาคุ้มทุน
+
+3. Buy Plan
+
+ผู้ใช้สามารถสร้างแผนแบ่งไม้ซื้อ โดยแต่ละแผนประกอบด้วย:
+
+- ราคาเป้าหมาย
+- จำนวนเงินที่จะซื้อ
+- ลำดับไม้
+- สถานะ Waiting, Triggered, Executed, Cancelled
+- วันที่แจ้งเตือน
+- วันที่ซื้อจริง
+
+ตัวอย่างแผนเริ่มต้น:
+
+- 63,300 บาท ซื้อ 20,000 บาท
+- 63,100 บาท ซื้อ 15,000 บาท
+- 62,900 บาท ซื้อ 15,000 บาท
+
+4. Price Alert
+
+ระบบต้องตรวจสอบราคาทุก 30–60 วินาที
+
+เงื่อนไขการแจ้งเตือน:
+
+- แจ้งเตือนเมื่อราคาลดลงถึงหรือผ่าน Buy Level
+- แจ้งเตือนเมื่อราคาเพิ่มขึ้นถึงหรือผ่าน Profit Level
+- ห้ามแจ้งเตือนซ้ำในระดับเดิมจนกว่าราคาจะออกจากช่วงและกลับมาตัดระดับอีกครั้ง
+- เก็บประวัติการแจ้งเตือนทุกครั้ง
+- ผู้ใช้สามารถเปิดหรือปิดระดับแจ้งเตือนได้
+
+Alert เริ่มต้น:
+
+- 63,300 บาท: Buy Alert #1 แนะนำซื้อ 20,000 บาท
+- 63,100 บาท: Buy Alert #2 แนะนำซื้อ 15,000 บาท
+- 62,900 บาท: Buy Alert #3 แนะนำซื้อ 15,000 บาท
+- 63,700 บาท: Recovery แนะนำถือ
+- 64,000 บาท: Profit Zone แนะนำตรวจสอบกำไร
+- 64,500 บาท: Strong Profit แนะนำพิจารณาขายบางส่วน
+
+5. Recommendation Engine
+
+สร้าง Rule-based Recommendation ก่อน โดยผลลัพธ์ประกอบด้วย:
+
+- BUY
+- WAIT
+- HOLD
+- REVIEW_PROFIT
+- SELL_PARTIAL
+
+คำแนะนำต้องแสดงเหตุผล เช่น:
+
+- ราคายังไม่ถึง Buy Level
+- ราคาลดลงผ่าน Buy Alert #1
+- ราคาปัจจุบันสูงกว่าต้นทุนเฉลี่ย
+- กำไรถึงเป้าหมายที่กำหนด
+- เงินสดสำรองไม่เพียงพอสำหรับไม้ถัดไป
+
+ห้ามใช้ข้อความที่รับประกันผลตอบแทนหรือระบุว่าราคาจะขึ้นหรือลงอย่างแน่นอน
+
+6. Price History
+
+บันทึกราคาลงฐานข้อมูลตามช่วงเวลาที่กำหนด โดยอย่างน้อยเก็บ:
+
+- Timestamp
+- Product type
+- Buy price
+- Sell price
+- Source
+- Raw response hash
+
+รองรับการแสดงกราฟ:
+
+- Intraday
+- 7 วัน
+- 30 วัน
+- 3 เดือน
+- 1 ปี
+
+เพื่อป้องกันข้อมูลจำนวนมากเกินไป ให้รองรับการ aggregate ข้อมูลเป็น:
+
+- 1 นาที
+- 5 นาที
+- 15 นาที
+- 1 ชั่วโมง
+- 1 วัน
+
+7. Technical Indicators
+
+เตรียมโครงสร้างสำหรับคำนวณ:
+
+- SMA
+- EMA 20
+- EMA 50
+- RSI 14
+- MACD
+- Support และ Resistance
+
+Indicators ต้องคำนวณจากข้อมูลย้อนหลังที่เก็บในระบบ และแยก module ออกจาก Portfolio และ Alert Engine
+
+8. Pages
+
+สร้างหน้าอย่างน้อยดังนี้:
+
+- Dashboard
+- Portfolio
+- Add Transaction
+- Buy Plan
+- Price Alerts
+- Price History
+- Settings
+
+9. Dashboard Layout
+
+Dashboard ต้องแสดง:
+
+- Current Gold Price
+- Price Change
+- Last Updated
+- Portfolio Value
+- Total Invested
+- Average Cost
+- Current Profit/Loss
+- Available Cash
+- Next Buy Level
+- Current Recommendation
+- Recent Price Chart
+- Recent Alerts
+- Buy Plan Progress
+
+10. Data Model
+
+ออกแบบ database schema อย่างน้อยสำหรับ:
+
+- users
+- gold_products
+- gold_prices
+- portfolio_transactions
+- portfolios
+- buy_plans
+- buy_plan_levels
+- price_alerts
+- alert_events
+- notification_channels
+- application_settings
+
+11. Reliability
+
+ระบบต้องรองรับ:
+
+- Timeout ในการเรียก API
+- Retry แบบ exponential backoff
+- API response ผิดรูปแบบ
+- ราคาค้างหรือไม่มีการเปลี่ยนแปลงนานผิดปกติ
+- Redis ใช้งานไม่ได้
+- Database ใช้งานไม่ได้
+- ป้องกัน scheduler ทำงานซ้ำหลาย instance ด้วย distributed lock
+- Logging แบบ structured JSON
+- Health check endpoint
+- Readiness และ liveness endpoint
+
+12. Security
+
+- เก็บ API token และ webhook URL ใน environment variables
+- Validate request ด้วย DTO
+- ใช้ rate limiting สำหรับ public endpoints
+- ห้าม log secret หรือข้อมูล credential
+- รองรับ authentication ในระยะต่อไป
+- ระบบเริ่มต้นสามารถเป็น single-user application ได้
+
+Development Phases
+
+Phase 1: Project Foundation
+
+- Initial Next.js และ NestJS
+- Docker Compose
+- PostgreSQL
+- Prisma
+- Redis
+- Environment configuration
+- Health check
+- Basic logging
+
+Phase 2: Gold Price Integration
+
+- สร้าง Hua Seng Heng API client
+- Normalize API response
+- แสดงราคาปัจจุบัน
+- เก็บ price history
+- สร้าง scheduler
+
+Phase 3: Portfolio
+
+- เพิ่ม แก้ไข และลบรายการซื้อ
+- คำนวณน้ำหนักทอง
+- คำนวณต้นทุนเฉลี่ย
+- คำนวณกำไรขาดทุน
+- แสดง Portfolio Dashboard
+
+Phase 4: Buy Plan และ Alerts
+
+- สร้างแผนแบ่งไม้
+- ตรวจจับการตัดผ่านระดับราคา
+- ป้องกันแจ้งเตือนซ้ำ
+- เก็บ alert history
+- รองรับ Telegram หรือ LINE
+
+Phase 5: Charts และ Indicators
+
+- กราฟราคาย้อนหลัง
+- EMA
+- RSI
+- MACD
+- Support และ Resistance
+
+Phase 6: Recommendation Engine
+
+- Rule-based recommendations
+- Risk settings
+- Cash allocation
+- Profit target
+- Stop-buy conditions
+
+Coding Requirements
+
+- ใช้ Clean Architecture หรือ Modular Architecture
+- แยก external API integration, domain logic และ persistence ออกจากกัน
+- ใช้ strict TypeScript
+- หลีกเลี่ยง any
+- มี DTO validation
+- มี unit tests สำหรับ calculation services
+- มี integration tests สำหรับ API
+- มี mock Hua Seng Heng API สำหรับ local development
+- ห้ามสร้างตัวอย่าง UI ที่เป็นเพียง static hardcoded data
+- ใช้ seed data เฉพาะ development environment
+- สร้าง README อธิบาย setup และวิธีรันระบบ
+
+เริ่มดำเนินการเฉพาะ Phase 1 ก่อน ยังไม่ต้องสร้างฟีเจอร์ทั้งหมด ให้จัดเตรียมโครงสร้างโปรเจกต์ที่พร้อมต่อยอด และสรุปไฟล์ที่สร้างพร้อมคำสั่งสำหรับรันระบบ

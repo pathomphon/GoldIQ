@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ApplicationSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("application_settings")
+}
+
+model GoldProduct {
+  id                 String      @id @default(cuid())
+  code               String      @unique
+  name               String
+  purity             Decimal     @db.Decimal(5, 2)
+  sourceProductCode  String      @map("source_product_code")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+  prices             GoldPrice[]
+  transactions       GoldTransaction[]
+  buyPlans           BuyPlan[]
+
+  @@map("gold_products")
+}
+
+enum BuyPlanLevelStatus {
+  WAITING
+  TRIGGERED
+  EXECUTED
+  CANCELLED
+}
+
+enum AlertDeliveryStatus {
+  PENDING
+  SENT
+  SKIPPED
+  FAILED
+}
+
+model BuyPlan {
+  id        String         @id @default(cuid())
+  name      String
+  productId String         @map("product_id")
+  isActive  Boolean        @default(true) @map("is_active")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  product   GoldProduct    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  levels    BuyPlanLevel[]
+
+  @@index([productId])
+  @@index([isActive, createdAt(sort: Desc)])
+  @@map("buy_plans")
+}
+
+model BuyPlanLevel {
+  id                String             @id @default(cuid())
+  buyPlanId         String             @map("buy_plan_id")
+  targetPrice       Decimal            @map("target_price") @db.Decimal(12, 2)
+  investmentAmount  Decimal            @map("investment_amount") @db.Decimal(14, 2)
+  sequence          Int
+  status            BuyPlanLevelStatus @default(WAITING)
+  triggeredAt       DateTime?          @map("triggered_at")
+  executedAt        DateTime?          @map("executed_at")
+  cancelledAt       DateTime?          @map("cancelled_at")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  buyPlan           BuyPlan            @relation(fields: [buyPlanId], references: [id], onDelete: Cascade)
+  alertEvents       AlertEvent[]
+
+  @@unique([buyPlanId, sequence])
+  @@index([buyPlanId])
+  @@index([status, targetPrice])
+  @@map("buy_plan_levels")
+}
+
+model AlertEvent {
+  id             String              @id @default(cuid())
+  buyPlanLevelId String              @map("buy_plan_level_id")
+  observedPrice  Decimal             @map("observed_price") @db.Decimal(12, 2)
+  message        String
+  deliveryStatus AlertDeliveryStatus @default(PENDING) @map("delivery_status")
+  deliveryError  String?             @map("delivery_error")
+  triggeredAt    DateTime            @default(now()) @map("triggered_at")
+  buyPlanLevel   BuyPlanLevel        @relation(fields: [buyPlanLevelId], references: [id], onDelete: Cascade)
+
+  @@index([buyPlanLevelId])
+  @@index([triggeredAt(sort: Desc)])
+  @@map("alert_events")
+}
+
+model GoldTransaction {
+  id               String      @id @default(cuid())
+  productId        String      @map("product_id")
+  purchasedAt      DateTime    @map("purchased_at")
+  purchasePrice    Decimal     @map("purchase_price") @db.Decimal(12, 2)
+  investmentAmount Decimal     @map("investment_amount") @db.Decimal(14, 2)
+  goldWeight       Decimal     @map("gold_weight") @db.Decimal(14, 6)
+  fee              Decimal     @default(0) @db.Decimal(12, 2)
+  notes            String?
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  product          GoldProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([purchasedAt(sort: Desc)])
+  @@map("gold_transactions")
+}
+
+model GoldPrice {
+  id                String      @id @default(cuid())
+  productId         String      @map("product_id")
+  buyPrice          Decimal     @map("buy_price") @db.Decimal(12, 2)
+  sellPrice         Decimal     @map("sell_price") @db.Decimal(12, 2)
+  buyChange         Decimal?    @map("buy_change") @db.Decimal(12, 2)
+  sellChange        Decimal?    @map("sell_change") @db.Decimal(12, 2)
+  source            String
+  sourceUpdatedAt   DateTime    @map("source_updated_at")
+  fetchedAt         DateTime    @default(now()) @map("fetched_at")
+  rawResponseHash   String      @map("raw_response_hash")
+  product           GoldProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, rawResponseHash])
+  @@index([productId, sourceUpdatedAt(sort: Desc)])
+  @@index([sourceUpdatedAt(sort: Desc)])
+  @@map("gold_prices")
+}

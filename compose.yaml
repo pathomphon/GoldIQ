@@ -1,0 +1,121 @@
+name: goldiq
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-goldiq}
+      POSTGRES_USER: ${POSTGRES_USER:-goldiq}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-goldiq-local-only}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mock-hsh:
+    build:
+      context: .
+      dockerfile: apps/mock-hsh/Dockerfile
+    restart: unless-stopped
+    environment:
+      MOCK_HSH_PORT: 4010
+    ports:
+      - '4010:4010'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:4010/health']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      API_CORS_ORIGINS: http://localhost:3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-goldiq}:${POSTGRES_PASSWORD:-goldiq-local-only}@postgres:5432/${POSTGRES_DB:-goldiq}?schema=public
+      REDIS_URL: redis://redis:6379
+      HSH_PRICE_965_URL: http://mock-hsh:4010/api/values/getprice/
+      HSH_PRICE_9999_URL: http://mock-hsh:4010/api/values
+      HSH_API_TOKEN: ${HSH_API_TOKEN:-}
+      HSH_REQUEST_MAX_RETRIES: ${HSH_REQUEST_MAX_RETRIES:-3}
+      HSH_RETRY_BASE_DELAY_MS: ${HSH_RETRY_BASE_DELAY_MS:-250}
+      HSH_POLL_CRON: ${HSH_POLL_CRON:-*/1 * * * *}
+      HSH_SCHEDULER_ENABLED: ${HSH_SCHEDULER_ENABLED:-true}
+      GOLD_PRICE_REFRESH_LOCK_TTL_MS: ${GOLD_PRICE_REFRESH_LOCK_TTL_MS:-50000}
+      GOLD_PRICE_HISTORY_DEFAULT_LIMIT: ${GOLD_PRICE_HISTORY_DEFAULT_LIMIT:-100}
+      GOLD_PRICE_HISTORY_MAX_LIMIT: ${GOLD_PRICE_HISTORY_MAX_LIMIT:-500}
+      BUY_PLAN_ALERT_CRON: ${BUY_PLAN_ALERT_CRON:-*/30 * * * * *}
+      BUY_PLAN_ALERTS_ENABLED: ${BUY_PLAN_ALERTS_ENABLED:-true}
+      BUY_PLAN_ALERT_LOCK_TTL_MS: ${BUY_PLAN_ALERT_LOCK_TTL_MS:-25000}
+      LINE_CHANNEL_ACCESS_TOKEN: ${LINE_CHANNEL_ACCESS_TOKEN:-}
+      LINE_USER_ID: ${LINE_USER_ID:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock-hsh:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--quiet',
+          '--tries=1',
+          '--spider',
+          'http://127.0.0.1:4000/api/v1/health/liveness',
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      GOLDIQ_API_URL: http://api:4000/api/v1
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,33 @@
+{
+  "name": "goldiq",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal gold intelligence application",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev --workspace @goldiq/api",
+    "dev:web": "npm run dev --workspace @goldiq/web",
+    "dev:mock": "npm run dev --workspace @goldiq/mock-hsh",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:integration": "npm run test:integration --workspace @goldiq/api",
+    "prisma:generate": "npm run prisma:generate --workspace @goldiq/api",
+    "prisma:migrate": "npm run prisma:migrate --workspace @goldiq/api",
+    "prisma:seed": "npm run prisma:seed --workspace @goldiq/api",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run build"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}
