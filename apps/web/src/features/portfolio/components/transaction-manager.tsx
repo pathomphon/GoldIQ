@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
 import type { GoldProductCode } from '@/features/gold-price/types';
+import { SaleManager } from '@/features/portfolio/components/sale-manager';
 import type { GoldTransaction } from '@/features/portfolio/types';
 
 interface TransactionManagerProps {
@@ -241,68 +242,71 @@ export function TransactionManager({ transactions, defaultPurchasedAt }: Transac
         ) : (
           <div className="transaction-list">
             {transactions.map((transaction) => (
-              <article className="transaction-item" key={transaction.id}>
-                <div>
-                  <strong>{transaction.productName}</strong>
-                  <small>
-                    {new Intl.DateTimeFormat('th-TH', {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                      timeZone: 'Asia/Bangkok',
-                    }).format(new Date(transaction.purchasedAt))}
-                  </small>
+              <article className="transaction-card" key={transaction.id}>
+                <div className="transaction-item">
+                  <div>
+                    <strong>{transaction.productName}</strong>
+                    <small>
+                      {new Intl.DateTimeFormat('th-TH', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                        timeZone: 'Asia/Bangkok',
+                      }).format(new Date(transaction.purchasedAt))}
+                    </small>
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>ลงทุน</dt>
+                      <dd>฿{numberFormatter.format(transaction.investmentAmount)}</dd>
+                    </div>
+                    <div>
+                      <dt>น้ำหนักคงเหลือ</dt>
+                      <dd>{transaction.remainingGoldWeight.toFixed(6)} บาททอง</dd>
+                    </div>
+                    <div>
+                      <dt>ราคาซื้อ</dt>
+                      <dd>฿{numberFormatter.format(transaction.purchasePrice)}</dd>
+                    </div>
+                  </dl>
+                  <div className="row-actions">
+                    {pendingDeleteId === transaction.id ? (
+                      <>
+                        <button
+                          className="text-button text-button--danger"
+                          onClick={() => void remove(transaction.id)}
+                          type="button"
+                        >
+                          ยืนยันลบ
+                        </button>
+                        <button
+                          className="text-button"
+                          onClick={() => setPendingDeleteId(null)}
+                          type="button"
+                        >
+                          ยกเลิก
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="text-button"
+                          onClick={() => startEditing(transaction)}
+                          type="button"
+                        >
+                          แก้ไข
+                        </button>
+                        <button
+                          className="text-button text-button--danger"
+                          onClick={() => setPendingDeleteId(transaction.id)}
+                          type="button"
+                        >
+                          ลบ
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <dl>
-                  <div>
-                    <dt>ลงทุน</dt>
-                    <dd>฿{numberFormatter.format(transaction.investmentAmount)}</dd>
-                  </div>
-                  <div>
-                    <dt>น้ำหนัก</dt>
-                    <dd>{transaction.goldWeight.toFixed(6)} บาททอง</dd>
-                  </div>
-                  <div>
-                    <dt>ราคาซื้อ</dt>
-                    <dd>฿{numberFormatter.format(transaction.purchasePrice)}</dd>
-                  </div>
-                </dl>
-                <div className="row-actions">
-                  {pendingDeleteId === transaction.id ? (
-                    <>
-                      <button
-                        className="text-button text-button--danger"
-                        onClick={() => void remove(transaction.id)}
-                        type="button"
-                      >
-                        ยืนยันลบ
-                      </button>
-                      <button
-                        className="text-button"
-                        onClick={() => setPendingDeleteId(null)}
-                        type="button"
-                      >
-                        ยกเลิก
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className="text-button"
-                        onClick={() => startEditing(transaction)}
-                        type="button"
-                      >
-                        แก้ไข
-                      </button>
-                      <button
-                        className="text-button text-button--danger"
-                        onClick={() => setPendingDeleteId(transaction.id)}
-                        type="button"
-                      >
-                        ลบ
-                      </button>
-                    </>
-                  )}
-                </div>
+                <SaleManager defaultSoldAt={defaultPurchasedAt} transaction={transaction} />
               </article>
             ))}
           </div>

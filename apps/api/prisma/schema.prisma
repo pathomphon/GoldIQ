@@ -110,10 +110,28 @@ model GoldTransaction {
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
   product          GoldProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
+  sales            GoldSale[]
 
   @@index([productId])
   @@index([purchasedAt(sort: Desc)])
   @@map("gold_transactions")
+}
+
+model GoldSale {
+  id                    String          @id @default(cuid())
+  purchaseTransactionId String          @map("purchase_transaction_id")
+  soldAt                DateTime        @map("sold_at")
+  salePrice             Decimal         @map("sale_price") @db.Decimal(12, 2)
+  goldWeight            Decimal         @map("gold_weight") @db.Decimal(14, 6)
+  fee                   Decimal         @default(0) @db.Decimal(12, 2)
+  notes                 String?
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+  purchaseTransaction   GoldTransaction @relation(fields: [purchaseTransactionId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseTransactionId, soldAt(sort: Desc)])
+  @@index([soldAt(sort: Desc)])
+  @@map("gold_sales")
 }
 
 model GoldPrice {
@@ -133,4 +151,65 @@ model GoldPrice {
   @@index([productId, sourceUpdatedAt(sort: Desc)])
   @@index([sourceUpdatedAt(sort: Desc)])
   @@map("gold_prices")
+}
+
+model NewsArticle {
+  id           String   @id @default(cuid())
+  source       String
+  externalId   String   @map("external_id")
+  canonicalUrl String   @map("canonical_url")
+  urlHash      String   @unique @map("url_hash")
+  title        String
+  excerpt      String?
+  sourceTier   String   @default("PRIMARY") @map("source_tier")
+  publishedAt  DateTime @map("published_at")
+  fetchedAt    DateTime @default(now()) @map("fetched_at")
+  rawHash      String                @map("raw_hash")
+  briefEvidence MarketBriefEvidence[]
+
+  @@unique([source, externalId])
+  @@index([publishedAt(sort: Desc)])
+  @@index([source, publishedAt(sort: Desc)])
+  @@map("news_articles")
+}
+
+enum MarketBriefStance {
+  BULLISH
+  NEUTRAL
+  BEARISH
+}
+
+model MarketBrief {
+  id             String                 @id @default(cuid())
+  generatedAt    DateTime               @default(now()) @map("generated_at")
+  windowStart    DateTime               @map("window_start")
+  windowEnd      DateTime               @map("window_end")
+  stance         MarketBriefStance
+  confidence     Decimal                @db.Decimal(4, 3)
+  summary        String
+  bullishFactors Json                   @map("bullish_factors")
+  bearishFactors Json                   @map("bearish_factors")
+  riskFlags      Json                   @map("risk_flags")
+  unknowns       Json
+  provider       String
+  model          String
+  promptVersion  String                 @map("prompt_version")
+  responseId     String?                @map("response_id")
+  expiresAt      DateTime               @map("expires_at")
+  evidence       MarketBriefEvidence[]
+
+  @@index([generatedAt(sort: Desc)])
+  @@index([expiresAt])
+  @@map("market_briefs")
+}
+
+model MarketBriefEvidence {
+  briefId   String      @map("brief_id")
+  articleId String      @map("article_id")
+  brief     MarketBrief @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  article   NewsArticle @relation(fields: [articleId], references: [id], onDelete: Restrict)
+
+  @@id([briefId, articleId])
+  @@index([articleId])
+  @@map("market_brief_evidence")
 }

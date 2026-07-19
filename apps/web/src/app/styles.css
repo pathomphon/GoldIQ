@@ -19,6 +19,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: clip;
   color: var(--ink);
   background: var(--background);
   font-family: Inter, 'Segoe UI', Arial, sans-serif;
@@ -31,13 +32,18 @@ a {
 
 .app-shell {
   display: grid;
+  width: 100%;
   min-height: 100vh;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr auto;
 }
 
 .topbar {
   display: flex;
+  width: 100%;
   min-height: 92px;
+  min-width: 0;
   align-items: stretch;
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
@@ -81,10 +87,508 @@ a {
 .price-page,
 .portfolio-page,
 .buy-plan-page,
+.analysis-page,
+.recommendation-page,
 .status-page {
   width: min(100%, 1440px);
   margin: 0 auto;
   padding: clamp(72px, 9vw, 128px) clamp(24px, 5vw, 80px) 80px;
+}
+
+.analysis-page {
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: clamp(44px, 5vw, 72px) clamp(24px, 5vw, 80px) 72px;
+}
+
+.recommendation-page {
+  width: min(100%, 1440px);
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 34px clamp(24px, 5vw, 80px) 80px;
+}
+
+.recommendation-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 34px;
+}
+
+.recommendation-heading h1 {
+  font-size: clamp(42px, 4.4vw, 64px);
+  line-height: 1.04;
+}
+
+.recommendation-heading time {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.recommendation-hero {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  min-height: 220px;
+  border-block: 1px solid var(--line);
+  border-left: 4px solid var(--gold);
+  padding: 28px 36px;
+}
+
+.recommendation-hero > div:first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--line);
+}
+
+.recommendation-hero span,
+.recommendation-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.recommendation-hero strong {
+  margin: 10px 0 8px;
+  color: var(--gold);
+  font-size: clamp(64px, 8vw, 108px);
+  letter-spacing: -0.07em;
+  line-height: 0.9;
+}
+
+.action-buy strong,
+.action-sell_partial strong {
+  color: var(--healthy);
+}
+
+.recommendation-reasons {
+  align-self: center;
+  padding-left: clamp(32px, 5vw, 72px);
+}
+
+.recommendation-reasons h2,
+.risk-settings h2 {
+  margin: 0;
+  font-size: clamp(24px, 2vw, 32px);
+}
+
+.recommendation-reasons h2 {
+  color: var(--gold);
+  font-size: 18px;
+}
+
+.recommendation-reasons ul {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding-left: 20px;
+}
+
+.recommendation-reasons li {
+  color: #34373d;
+  font-size: 14px;
+}
+
+.recommendation-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin-top: 34px;
+  border-block: 1px solid var(--line);
+}
+
+.recommendation-metrics article {
+  display: flex;
+  min-height: 150px;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--line);
+  padding: 20px 28px;
+}
+
+.recommendation-metrics article:last-child {
+  border-right: 0;
+}
+
+.recommendation-metrics span,
+.recommendation-metrics small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.recommendation-metrics strong {
+  margin: 14px 0 9px;
+  font-size: clamp(22px, 2vw, 32px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.risk-settings {
+  margin-top: 34px;
+  border-top: 1px solid var(--line);
+  padding: 26px 16px 0;
+}
+
+.market-brief {
+  margin-top: 44px;
+  border-block: 1px solid var(--line);
+  padding: 32px 4px;
+}
+
+.market-brief--empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.market-brief--empty p:last-child {
+  max-width: 620px;
+  color: var(--muted);
+}
+
+.market-brief__heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.market-brief h2,
+.market-brief h3,
+.market-brief p {
+  margin: 0;
+}
+
+.market-brief h2 {
+  font-size: clamp(28px, 3vw, 42px);
+}
+
+.market-brief__status {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.brief-stance {
+  border: 1px solid var(--line);
+  padding: 7px 10px;
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.brief-stance--bullish {
+  color: var(--healthy);
+  border-color: var(--healthy);
+}
+
+.brief-stance--bearish {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.market-brief__summary {
+  max-width: 960px;
+  margin-top: 30px !important;
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.brief-warning {
+  margin-top: 20px !important;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.market-brief__factors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.market-brief__factors article {
+  min-height: 170px;
+  padding: 26px 28px 22px 0;
+}
+
+.market-brief__factors article + article {
+  border-left: 1px solid var(--line);
+  padding-left: 28px;
+}
+
+.market-brief__factors h3,
+.market-brief__evidence h3 {
+  font-size: 15px;
+}
+
+.market-brief__factors ul {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding-left: 20px;
+}
+
+.market-brief__factors p {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.market-brief__evidence {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+
+.market-brief__evidence ol {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding-left: 22px;
+}
+
+.market-brief__evidence li {
+  padding-left: 8px;
+}
+
+.market-brief__evidence a {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.market-brief__evidence span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.market-brief__disclaimer {
+  margin-top: 26px !important;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.risk-settings-form {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px clamp(28px, 4vw, 64px);
+  margin-top: 28px;
+}
+
+.risk-settings-form label {
+  display: grid;
+  gap: 9px;
+  color: #333740;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.risk-settings-form input,
+.risk-settings-form select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #c9cdd4;
+  border-radius: 0;
+  color: var(--ink);
+  background: #fff;
+  padding: 11px 14px;
+  font: inherit;
+  font-weight: 450;
+}
+
+.risk-settings-form input:focus,
+.risk-settings-form select:focus {
+  border-color: var(--gold);
+  outline: 2px solid rgb(185 130 24 / 18%);
+}
+
+.risk-settings-submit {
+  display: flex;
+  grid-column: 2 / 4;
+  align-items: center;
+  gap: 20px;
+}
+
+.risk-settings-submit .button {
+  width: 100%;
+}
+
+.form-success {
+  margin: 0;
+  color: var(--healthy);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.analysis-page h1 {
+  font-size: clamp(42px, 4.4vw, 64px);
+  line-height: 1.04;
+}
+
+.analysis-page .lede {
+  margin: 18px 0 clamp(40px, 5vw, 64px);
+  font-size: clamp(17px, 1.5vw, 21px);
+}
+
+.analysis-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 34px;
+}
+
+.analysis-controls > div {
+  display: flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+}
+
+.analysis-controls a {
+  border-right: 1px solid var(--line);
+  padding: 11px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.analysis-controls a:last-child {
+  border-right: 0;
+}
+
+.analysis-controls .control-active {
+  color: #fff;
+  background: var(--ink);
+}
+
+.analysis-latest {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(18px, 3vw, 48px);
+  border-top: 1px solid var(--line);
+  padding: 24px 0 16px;
+}
+
+.analysis-latest span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.analysis-latest strong {
+  color: var(--gold);
+  font-size: clamp(18px, 2vw, 28px);
+  font-variant-numeric: tabular-nums;
+}
+
+.analysis-latest .buy-text {
+  color: var(--danger);
+}
+
+.price-chart {
+  position: relative;
+  height: clamp(280px, 29vw, 400px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0 42px;
+}
+
+.price-chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: #e8e9ec;
+  stroke-width: 0.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-line {
+  fill: none;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-line--sell {
+  stroke: var(--gold);
+}
+
+.chart-line--buy {
+  stroke: #d92d20;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-legend span::before {
+  display: inline-block;
+  width: 22px;
+  height: 2px;
+  margin: 0 8px 3px 0;
+  background: currentColor;
+  content: '';
+}
+
+.chart-legend .sell {
+  color: var(--gold);
+}
+.chart-legend .buy {
+  color: var(--danger);
+}
+
+.analysis-empty {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  border-block: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.indicator-table {
+  margin-top: 44px;
+  border-bottom: 1px solid var(--line);
+}
+
+.indicator-table article {
+  display: grid;
+  grid-template-columns: 140px minmax(220px, 1fr) 1.4fr;
+  align-items: center;
+  gap: 32px;
+  min-height: 88px;
+  border-top: 1px solid var(--line);
+  padding: 16px 4px;
+}
+
+.indicator-table h2,
+.indicator-table p {
+  margin: 0;
+}
+
+.indicator-table h2 {
+  font-size: 20px;
+}
+
+.indicator-table strong {
+  color: var(--gold);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicator-table p {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .plan-summary {
@@ -641,12 +1145,15 @@ footer i {
   border-bottom: 1px solid var(--line);
 }
 
+.transaction-card {
+  border-top: 1px solid var(--line);
+}
+
 .transaction-item {
   display: grid;
   grid-template-columns: minmax(190px, 1fr) minmax(330px, 1.6fr) auto;
   align-items: center;
   gap: 28px;
-  border-top: 1px solid var(--line);
   padding: 24px 4px;
 }
 
@@ -708,9 +1215,105 @@ footer i {
   color: var(--danger);
 }
 
+.sale-manager {
+  display: grid;
+  gap: 20px;
+  border-top: 1px dashed var(--line);
+  padding: 20px 4px 28px;
+}
+
+.sale-manager > .button,
+.sale-manager > .status-pill {
+  justify-self: start;
+}
+
+.sale-form {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  border-left: 4px solid var(--gold);
+  background: #fbfaf6;
+  padding: 24px;
+}
+
+.sale-form__heading {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sale-form__heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sale-form label {
+  display: grid;
+  gap: 8px;
+  color: #333740;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.sale-form input,
+.sale-form textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #c9cdd4;
+  border-radius: 0;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+  font-weight: 450;
+}
+
+.sale-history {
+  border-top: 1px solid var(--line);
+}
+
+.sale-history h3 {
+  margin: 18px 0;
+  font-size: 15px;
+}
+
+.sale-history__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+}
+
+.sale-history__row strong,
+.sale-history__row small,
+.sale-history__row span {
+  display: block;
+}
+
+.sale-history__row small,
+.sale-history__row span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.profit-up {
+  color: var(--healthy);
+}
+
+.profit-down {
+  color: var(--danger);
+}
+
 @media (max-width: 760px) {
   .topbar {
     min-height: 72px;
+    gap: 16px;
+    padding-inline: 16px;
   }
 
   .wordmark {
@@ -725,8 +1328,120 @@ footer i {
   .price-page,
   .portfolio-page,
   .buy-plan-page,
+  .analysis-page,
+  .recommendation-page,
   .status-page {
     padding-top: 56px;
+  }
+
+  .topbar nav {
+    min-width: 0;
+    flex: 1;
+    overflow-x: auto;
+  }
+
+  .analysis-controls,
+  .analysis-latest {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .analysis-controls > div {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .analysis-controls a {
+    text-align: center;
+  }
+
+  .analysis-latest span {
+    margin-right: 0;
+  }
+
+  .indicator-table article {
+    grid-template-columns: 100px 1fr;
+    gap: 10px 18px;
+  }
+
+  .recommendation-heading,
+  .recommendation-hero {
+    display: block;
+  }
+
+  .recommendation-heading h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .recommendation-heading time {
+    display: block;
+    margin-top: 14px;
+  }
+
+  .recommendation-hero {
+    padding: 24px 20px;
+  }
+
+  .recommendation-hero > div:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+  }
+
+  .recommendation-reasons {
+    padding: 24px 0 0;
+  }
+
+  .recommendation-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .recommendation-metrics article {
+    min-height: 130px;
+    border-bottom: 1px solid var(--line);
+    padding: 18px;
+  }
+
+  .recommendation-metrics article:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .risk-settings {
+    padding-inline: 0;
+  }
+
+  .market-brief--empty,
+  .market-brief__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .market-brief__status {
+    flex-wrap: wrap;
+  }
+
+  .market-brief__factors {
+    grid-template-columns: 1fr;
+  }
+
+  .market-brief__factors article + article {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .risk-settings-form {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-settings-submit {
+    grid-column: auto;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .indicator-table p {
+    grid-column: 1 / -1;
   }
 
   .plan-summary {
@@ -828,6 +1543,28 @@ footer i {
   .transaction-item dl {
     grid-column: 1 / -1;
     grid-row: 2;
+  }
+
+  .sale-form {
+    grid-template-columns: 1fr;
+  }
+
+  .sale-form__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sale-history__row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .sale-history__row > div:nth-child(2) {
+    text-align: right;
+  }
+
+  .sale-history__row .row-actions {
+    grid-column: 1 / -1;
+    grid-row: auto;
   }
 
   .row-actions {

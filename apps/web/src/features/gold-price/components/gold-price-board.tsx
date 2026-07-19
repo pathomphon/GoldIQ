@@ -84,6 +84,12 @@ export function GoldPriceBoard({ prices }: GoldPriceBoardProps) {
           <Link className="nav-link" href="/buy-plan">
             Buy plan
           </Link>
+          <Link className="nav-link" href="/analysis">
+            Analysis
+          </Link>
+          <Link className="nav-link" href="/recommendation">
+            Recommendation
+          </Link>
           <Link className="nav-link" href="/system-status">
             System status
           </Link>

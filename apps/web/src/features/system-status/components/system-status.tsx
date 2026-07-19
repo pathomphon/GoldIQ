@@ -53,6 +53,12 @@ export function SystemStatus({ readiness }: SystemStatusProps) {
           <Link className="nav-link" href="/buy-plan">
             Buy plan
           </Link>
+          <Link className="nav-link" href="/analysis">
+            Analysis
+          </Link>
+          <Link className="nav-link" href="/recommendation">
+            Recommendation
+          </Link>
           <Link aria-current="page" className="nav-link nav-link--active" href="/system-status">
             System status
           </Link>

@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import './styles.css';
 
 export const metadata: Metadata = {
-  title: 'GoldIQ · Current gold prices',
-  description: 'Current Hua Seng Heng gold prices and GoldIQ system readiness.',
+  title: 'GoldIQ · Gold investment intelligence',
+  description: 'Gold prices, portfolio, buy plans, analysis, and rule-based recommendations.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

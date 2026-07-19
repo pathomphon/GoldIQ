@@ -22,20 +22,52 @@ export class MessagingAlertNotificationAdapter implements AlertNotificationPort 
   }
 
   async send(message: string): Promise<AlertNotificationResult> {
-    try {
-      if (this.telegramBotToken && this.telegramChatId) {
-        return this.sendTelegram(message);
-      }
-      if (this.lineAccessToken && this.lineUserId) {
-        return this.sendLine(message);
-      }
+    const deliveries: {
+      readonly provider: 'Telegram' | 'LINE';
+      readonly send: () => Promise<AlertNotificationResult>;
+    }[] = [];
+
+    if (this.telegramBotToken && this.telegramChatId) {
+      deliveries.push({
+        provider: 'Telegram',
+        send: () => this.sendTelegram(message),
+      });
+    }
+    if (this.lineAccessToken && this.lineUserId) {
+      deliveries.push({
+        provider: 'LINE',
+        send: () => this.sendLine(message),
+      });
+    }
+    if (deliveries.length === 0) {
       return { status: 'SKIPPED', error: null };
-    } catch (error: unknown) {
+    }
+
+    const results = await Promise.all(
+      deliveries.map(async ({ provider, send }) => {
+        try {
+          return await send();
+        } catch (error: unknown) {
+          return {
+            status: 'FAILED' as const,
+            error: `${provider}: ${
+              error instanceof Error ? error.message : 'Notification request failed'
+            }`,
+          };
+        }
+      }),
+    );
+    const errors = results.flatMap((result) =>
+      result.status === 'FAILED' ? [result.error ?? 'Notification request failed'] : [],
+    );
+
+    if (errors.length > 0) {
       return {
         status: 'FAILED',
-        error: error instanceof Error ? error.message : 'Notification request failed',
+        error: errors.join('; '),
       };
     }
+    return { status: 'SENT', error: null };
   }
 
   private async sendTelegram(message: string): Promise<AlertNotificationResult> {

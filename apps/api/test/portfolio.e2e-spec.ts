@@ -5,8 +5,11 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CreateGoldTransactionService } from '../src/modules/portfolio/application/create-gold-transaction.service';
+import { CreateGoldSaleService } from '../src/modules/portfolio/application/create-gold-sale.service';
+import { DeleteGoldSaleService } from '../src/modules/portfolio/application/delete-gold-sale.service';
 import { DeleteGoldTransactionService } from '../src/modules/portfolio/application/delete-gold-transaction.service';
 import { GetPortfolioDashboardService } from '../src/modules/portfolio/application/get-portfolio-dashboard.service';
+import { UpdateGoldSaleService } from '../src/modules/portfolio/application/update-gold-sale.service';
 import { UpdateGoldTransactionService } from '../src/modules/portfolio/application/update-gold-transaction.service';
 import { PortfolioController } from '../src/modules/portfolio/presentation/portfolio.controller';
 
@@ -46,6 +49,9 @@ describe('Portfolio API (integration)', () => {
   const create = { execute: vi.fn().mockResolvedValue(storedTransaction) };
   const update = { execute: vi.fn().mockResolvedValue(storedTransaction) };
   const remove = { execute: vi.fn().mockResolvedValue(undefined) };
+  const createSale = { execute: vi.fn().mockResolvedValue({ id: 'sale-1' }) };
+  const updateSale = { execute: vi.fn().mockResolvedValue({ id: 'sale-1' }) };
+  const deleteSale = { execute: vi.fn().mockResolvedValue(undefined) };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -56,6 +62,9 @@ describe('Portfolio API (integration)', () => {
         { provide: CreateGoldTransactionService, useValue: create },
         { provide: UpdateGoldTransactionService, useValue: update },
         { provide: DeleteGoldTransactionService, useValue: remove },
+        { provide: CreateGoldSaleService, useValue: createSale },
+        { provide: UpdateGoldSaleService, useValue: updateSale },
+        { provide: DeleteGoldSaleService, useValue: deleteSale },
       ],
     }).compile();
 
@@ -91,6 +100,21 @@ describe('Portfolio API (integration)', () => {
         fee: 0,
       })
       .expect(201);
+
+    await request(httpServer)
+      .post('/api/v1/portfolio/sales')
+      .send({
+        purchaseTransactionId: 'transaction-1',
+        soldAt: '2026-07-10T03:00:00.000Z',
+        salePrice: 65_000,
+        goldWeight: 0.1,
+        fee: 50,
+      })
+      .expect(201);
+
+    await request(httpServer).patch('/api/v1/portfolio/sales/sale-1').send({ fee: 75 }).expect(200);
+
+    await request(httpServer).delete('/api/v1/portfolio/sales/sale-1').expect(204);
 
     await request(httpServer)
       .patch('/api/v1/portfolio/transactions/transaction-1')

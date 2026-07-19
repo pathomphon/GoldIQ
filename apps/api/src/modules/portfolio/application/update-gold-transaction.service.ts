@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { calculateGoldWeight } from '../domain/portfolio.calculator';
 import {
@@ -23,12 +29,28 @@ export class UpdateGoldTransactionService {
 
     const purchasePrice = command.purchasePrice ?? existing.purchasePrice;
     const investmentAmount = command.investmentAmount ?? existing.investmentAmount;
+    const purchasedAt = command.purchasedAt ?? existing.purchasedAt;
+    const productCode = command.productCode ?? existing.productCode;
+    const goldWeight = calculateGoldWeight(investmentAmount, purchasePrice);
+    const sales = existing.sales ?? [];
+
+    if (sales.length > 0 && productCode !== existing.productCode) {
+      throw new ConflictException('Gold product cannot be changed after a sale is recorded');
+    }
+    if (sales.some((sale) => purchasedAt > sale.soldAt)) {
+      throw new BadRequestException('Purchase date cannot be after a recorded sale date');
+    }
+    const soldWeight = sales.reduce((sum, sale) => sum + sale.goldWeight, 0);
+    if (goldWeight + 0.0000005 < soldWeight) {
+      throw new ConflictException('Updated purchase weight cannot be lower than sold weight');
+    }
+
     const updated = await this.repository.updateTransaction(id, {
-      productCode: command.productCode ?? existing.productCode,
-      purchasedAt: command.purchasedAt ?? existing.purchasedAt,
+      productCode,
+      purchasedAt,
       purchasePrice,
       investmentAmount,
-      goldWeight: calculateGoldWeight(investmentAmount, purchasePrice),
+      goldWeight,
       fee: command.fee ?? existing.fee,
       notes: command.notes === undefined ? existing.notes : command.notes,
     });

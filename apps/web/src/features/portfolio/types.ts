@@ -12,6 +12,26 @@ export interface GoldTransaction {
   readonly notes: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly remainingGoldWeight: number;
+  readonly realizedProfitLoss: number;
+  readonly status: 'OPEN' | 'PARTIALLY_SOLD' | 'CLOSED';
+  readonly sales: readonly GoldSale[];
+}
+
+export interface GoldSale {
+  readonly id: string;
+  readonly purchaseTransactionId: string;
+  readonly soldAt: string;
+  readonly salePrice: number;
+  readonly goldWeight: number;
+  readonly fee: number;
+  readonly notes: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly grossProceeds: number;
+  readonly netProceeds: number;
+  readonly allocatedCost: number;
+  readonly realizedProfitLoss: number;
 }
 
 export interface PortfolioMetrics {
@@ -24,6 +44,13 @@ export interface PortfolioMetrics {
   readonly breakEvenPrice: number;
   readonly valuedGoldWeight: number;
   readonly unvaluedGoldWeight: number;
+  readonly realizedProfitLoss: number;
+  readonly winRate: number | null;
+  readonly winningLots: number;
+  readonly losingLots: number;
+  readonly breakEvenLots: number;
+  readonly closedLots: number;
+  readonly openLots: number;
 }
 
 export interface PortfolioDashboardData {

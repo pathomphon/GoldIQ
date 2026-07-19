@@ -50,6 +50,13 @@ describe('portfolio calculator', () => {
       breakEvenPrice: 60_733.33,
       valuedGoldWeight: 1.5,
       unvaluedGoldWeight: 0,
+      realizedProfitLoss: 0,
+      winRate: null,
+      winningLots: 0,
+      losingLots: 0,
+      breakEvenLots: 0,
+      closedLots: 0,
+      openLots: 2,
     });
   });
 
@@ -58,5 +65,85 @@ describe('portfolio calculator', () => {
 
     expect(metrics.currentValue).toBe(0);
     expect(metrics.unvaluedGoldWeight).toBe(1);
+  });
+
+  it('uses only the remaining position for unrealized metrics and reports realized profit', () => {
+    const purchase = {
+      ...transaction(),
+      sales: [
+        {
+          id: 'sale-1',
+          purchaseTransactionId: 'transaction-1',
+          soldAt: new Date('2026-07-10T03:00:00.000Z'),
+          salePrice: 65_000,
+          goldWeight: 0.4,
+          fee: 100,
+          notes: null,
+          createdAt: new Date('2026-07-10T03:00:00.000Z'),
+          updatedAt: new Date('2026-07-10T03:00:00.000Z'),
+        },
+      ],
+    } satisfies GoldTransaction;
+
+    expect(
+      calculatePortfolioMetrics([purchase], [{ productCode: 'GOLD_BAR_965', buyPrice: 63_000 }]),
+    ).toEqual({
+      totalInvested: 36_060,
+      totalGoldWeight: 0.6,
+      averageCost: 60_100,
+      currentValue: 37_800,
+      profitLoss: 1_740,
+      profitLossPercentage: 4.83,
+      breakEvenPrice: 60_100,
+      valuedGoldWeight: 0.6,
+      unvaluedGoldWeight: 0,
+      realizedProfitLoss: 1_860,
+      winRate: null,
+      winningLots: 0,
+      losingLots: 0,
+      breakEvenLots: 0,
+      closedLots: 0,
+      openLots: 1,
+    });
+  });
+
+  it('calculates win rate from winning and losing closed lots while excluding break-even', () => {
+    const closedTransaction = (
+      id: string,
+      salePrice: number,
+      saleFee: number,
+    ): GoldTransaction => ({
+      ...transaction({ id }),
+      sales: [
+        {
+          id: `sale-${id}`,
+          purchaseTransactionId: id,
+          soldAt: new Date('2026-07-10T03:00:00.000Z'),
+          salePrice,
+          goldWeight: 1,
+          fee: saleFee,
+          notes: null,
+          createdAt: new Date('2026-07-10T03:00:00.000Z'),
+          updatedAt: new Date('2026-07-10T03:00:00.000Z'),
+        },
+      ],
+    });
+
+    const metrics = calculatePortfolioMetrics(
+      [
+        closedTransaction('winner', 62_000, 100),
+        closedTransaction('loser', 59_000, 100),
+        closedTransaction('break-even', 60_200, 100),
+      ],
+      [{ productCode: 'GOLD_BAR_965', buyPrice: 63_000 }],
+    );
+
+    expect(metrics.winRate).toBe(50);
+    expect(metrics.winningLots).toBe(1);
+    expect(metrics.losingLots).toBe(1);
+    expect(metrics.breakEvenLots).toBe(1);
+    expect(metrics.closedLots).toBe(3);
+    expect(metrics.openLots).toBe(0);
+    expect(metrics.totalGoldWeight).toBe(0);
   });
 });
