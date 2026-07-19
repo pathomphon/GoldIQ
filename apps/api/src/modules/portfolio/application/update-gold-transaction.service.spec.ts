@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { PortfolioRepositoryPort } from '../domain/portfolio.repository.port';
@@ -32,6 +33,10 @@ describe('UpdateGoldTransactionService', () => {
       createTransaction: vi.fn(),
       updateTransaction,
       deleteTransaction: vi.fn(),
+      findSale: vi.fn(),
+      createSale: vi.fn(),
+      updateSale: vi.fn(),
+      deleteSale: vi.fn(),
       findCurrentBuyPrices: vi.fn(),
       findLatestPriceTimestamp: vi.fn(),
     };
@@ -46,5 +51,34 @@ describe('UpdateGoldTransactionService', () => {
       existing.id,
       expect.objectContaining({ goldWeight: 0.315956 }),
     );
+  });
+
+  it('rejects changing the product after a sale has been recorded', async () => {
+    const updateTransaction = vi.fn();
+    const repository = {
+      findTransaction: vi.fn().mockResolvedValue({
+        ...existing,
+        sales: [
+          {
+            id: 'sale-1',
+            purchaseTransactionId: existing.id,
+            soldAt: new Date('2026-07-10T03:00:00.000Z'),
+            salePrice: 65_000,
+            goldWeight: 0.1,
+            fee: 0,
+            notes: null,
+            createdAt: new Date('2026-07-10T03:00:00.000Z'),
+            updatedAt: new Date('2026-07-10T03:00:00.000Z'),
+          },
+        ],
+      }),
+      updateTransaction,
+    } as unknown as PortfolioRepositoryPort;
+    const service = new UpdateGoldTransactionService(repository);
+
+    await expect(service.execute(existing.id, { productCode: 'GOLD_9999' })).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(updateTransaction).not.toHaveBeenCalled();
   });
 });

@@ -2,8 +2,10 @@ import { Controller, Get, Inject, Query } from '@nestjs/common';
 
 import { GetCurrentGoldPricesService } from '../application/get-current-gold-prices.service';
 import { GetGoldPriceHistoryService } from '../application/get-gold-price-history.service';
+import { GetTechnicalAnalysisService } from '../application/get-technical-analysis.service';
 import type { GoldProductCode } from '../domain/gold-product';
 import type { GoldPriceSnapshot } from '../domain/gold-price.types';
+import type { TechnicalAnalysis } from '../domain/technical-analysis';
 import { ParseHistoryLimitPipe } from './pipes/parse-history-limit.pipe';
 import { ParseGoldProductCodePipe } from './pipes/parse-gold-product-code.pipe';
 
@@ -18,6 +20,8 @@ export class GoldPriceController {
     private readonly getCurrentGoldPrices: GetCurrentGoldPricesService,
     @Inject(GetGoldPriceHistoryService)
     private readonly getGoldPriceHistory: GetGoldPriceHistoryService,
+    @Inject(GetTechnicalAnalysisService)
+    private readonly getTechnicalAnalysis: GetTechnicalAnalysisService,
   ) {}
 
   @Get('current')
@@ -35,5 +39,15 @@ export class GoldPriceController {
     return {
       data: await this.getGoldPriceHistory.execute(productCode, limit),
     };
+  }
+
+  @Get('analysis')
+  analysis(
+    @Query('productCode', ParseGoldProductCodePipe)
+    productCode: GoldProductCode | undefined,
+    @Query('limit', ParseHistoryLimitPipe)
+    limit: number | undefined,
+  ): Promise<TechnicalAnalysis> {
+    return this.getTechnicalAnalysis.execute(productCode ?? 'GOLD_BAR_965', limit ?? 100);
   }
 }

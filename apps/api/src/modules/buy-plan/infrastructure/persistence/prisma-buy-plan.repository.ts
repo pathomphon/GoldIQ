@@ -176,7 +176,7 @@ export class PrismaBuyPlanRepository implements BuyPlanRepositoryPort {
     status: AlertDeliveryStatus,
     error: string | null,
   ): Promise<void> {
-    await this.prisma.alertEvent.update({
+    await this.prisma.alertEvent.updateMany({
       where: { id: eventId },
       data: { deliveryStatus: status, deliveryError: error },
     });

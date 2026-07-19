@@ -13,6 +13,8 @@ import { HealthModule } from './modules/health/health.module';
 import { PortfolioModule } from './modules/portfolio/portfolio.module';
 import { BuyPlanModule } from './modules/buy-plan/buy-plan.module';
 import { GoldPriceModule } from './modules/gold-price/gold-price.module';
+import { RecommendationModule } from './modules/recommendation/recommendation.module';
+import { NewsIntelligenceModule } from './modules/news-intelligence/news-intelligence.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { GoldPriceModule } from './modules/gold-price/gold-price.module';
     GoldPriceModule,
     PortfolioModule,
     BuyPlanModule,
+    RecommendationModule,
+    NewsIntelligenceModule,
   ],
   providers: [
     {

@@ -33,6 +33,32 @@ const environmentSchema = z.object({
     .default('true')
     .transform((value) => value === 'true'),
   BUY_PLAN_ALERT_LOCK_TTL_MS: z.coerce.number().int().positive().default(25_000),
+  NEWS_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  NEWS_REFRESH_CRON: z.string().min(1).default('0 */15 * * * *'),
+  NEWS_REFRESH_LOCK_TTL_MS: z.coerce.number().int().positive().default(120_000),
+  NEWS_SOURCE_URLS: z.string().default('https://www.federalreserve.gov/feeds/press_all.xml'),
+  NEWS_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  NEWS_REQUEST_MAX_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
+  NEWS_RETRY_BASE_DELAY_MS: z.coerce.number().int().positive().default(500),
+  NEWS_MAX_FEED_BYTES: z.coerce.number().int().positive().max(5_000_000).default(1_000_000),
+  NEWS_DEFAULT_LIMIT: z.coerce.number().int().positive().max(100).default(30),
+  NEWS_MAX_LIMIT: z.coerce.number().int().positive().max(500).default(100),
+  RESEARCH_AGENT_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  RESEARCH_AGENT_CRON: z.string().min(1).default('0 5 * * * *'),
+  RESEARCH_AGENT_LOCK_TTL_MS: z.coerce.number().int().positive().default(120_000),
+  RESEARCH_AGENT_MODEL: z.string().min(1).default('gpt-5.6-luna'),
+  RESEARCH_AGENT_TIMEOUT_MS: z.coerce.number().int().positive().default(45_000),
+  RESEARCH_AGENT_WINDOW_HOURS: z.coerce.number().int().min(1).max(720).default(168),
+  RESEARCH_AGENT_MAX_ARTICLES: z.coerce.number().int().min(1).max(100).default(40),
+  RESEARCH_AGENT_BRIEF_TTL_MINUTES: z.coerce.number().int().min(5).max(1_440).default(60),
+  RESEARCH_AGENT_PROMPT_VERSION: z.string().min(1).default('gold-research-v1'),
+  OPENAI_API_KEY: z.string().min(1).optional().or(z.literal('')),
   LINE_CHANNEL_ACCESS_TOKEN: z.string().optional(),
   LINE_USER_ID: z.string().optional(),
   LINE_WEBHOOK_URL: z.string().url().optional().or(z.literal('')),
@@ -81,6 +107,30 @@ export interface AppEnvironment {
     enabled: boolean;
     lockTtlMs: number;
   };
+  news: {
+    enabled: boolean;
+    refreshCron: string;
+    refreshLockTtlMs: number;
+    sourceUrls: string[];
+    requestTimeoutMs: number;
+    requestMaxRetries: number;
+    retryBaseDelayMs: number;
+    maxFeedBytes: number;
+    defaultLimit: number;
+    maxLimit: number;
+  };
+  researchAgent: {
+    enabled: boolean;
+    cron: string;
+    lockTtlMs: number;
+    model: string;
+    timeoutMs: number;
+    windowHours: number;
+    maxArticles: number;
+    briefTtlMinutes: number;
+    promptVersion: string;
+    openAiApiKey?: string;
+  };
   notifications: {
     lineAccessToken?: string;
     lineUserId?: string;
@@ -94,6 +144,11 @@ export function validateEnvironment(values: Record<string, unknown>): RawEnviron
 
   if (!result.success) {
     throw new Error(`Invalid environment configuration: ${z.prettifyError(result.error)}`);
+  }
+  if (result.data.RESEARCH_AGENT_ENABLED && !result.data.OPENAI_API_KEY) {
+    throw new Error(
+      'Invalid environment configuration: OPENAI_API_KEY is required when RESEARCH_AGENT_ENABLED=true',
+    );
   }
 
   return result.data;

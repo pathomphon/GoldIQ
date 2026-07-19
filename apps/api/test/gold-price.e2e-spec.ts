@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GetCurrentGoldPricesService } from '../src/modules/gold-price/application/get-current-gold-prices.service';
 import { GetGoldPriceHistoryService } from '../src/modules/gold-price/application/get-gold-price-history.service';
+import { GetTechnicalAnalysisService } from '../src/modules/gold-price/application/get-technical-analysis.service';
 import { GoldPriceController } from '../src/modules/gold-price/presentation/gold-price.controller';
 
 const currentPrice = {
@@ -27,6 +28,17 @@ describe('Gold price API (integration)', () => {
   let app: INestApplication | undefined;
   const current = { execute: vi.fn().mockResolvedValue([currentPrice]) };
   const history = { execute: vi.fn().mockResolvedValue([currentPrice]) };
+  const analysis = {
+    execute: vi.fn().mockResolvedValue({
+      productCode: 'GOLD_BAR_965',
+      samples: [],
+      ema: { '20': null, '50': null, '100': null, '200': null },
+      rsi: null,
+      macd: null,
+      support: [],
+      resistance: [],
+    }),
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -35,6 +47,7 @@ describe('Gold price API (integration)', () => {
       providers: [
         { provide: GetCurrentGoldPricesService, useValue: current },
         { provide: GetGoldPriceHistoryService, useValue: history },
+        { provide: GetTechnicalAnalysisService, useValue: analysis },
       ],
     }).compile();
 
@@ -71,6 +84,11 @@ describe('Gold price API (integration)', () => {
       .get('/api/v1/gold-prices/history?productCode=GOLD_BAR_965&limit=25')
       .expect(200);
     expect(history.execute).toHaveBeenCalledWith('GOLD_BAR_965', 25);
+
+    await request(httpServer)
+      .get('/api/v1/gold-prices/analysis?productCode=GOLD_BAR_965&limit=100')
+      .expect(200);
+    expect(analysis.execute).toHaveBeenCalledWith('GOLD_BAR_965', 100);
   });
 
   it('rejects unsupported product codes', async () => {

@@ -27,6 +27,12 @@ export function BuyPlanDashboard({ result }: Readonly<{ result: BuyPlanDashboard
           <Link aria-current="page" className="nav-link nav-link--active" href="/buy-plan">
             Buy plan
           </Link>
+          <Link className="nav-link" href="/analysis">
+            Analysis
+          </Link>
+          <Link className="nav-link" href="/recommendation">
+            Recommendation
+          </Link>
           <Link className="nav-link" href="/system-status">
             System status
           </Link>

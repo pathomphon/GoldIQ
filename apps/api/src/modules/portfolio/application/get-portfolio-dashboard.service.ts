@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { calculatePortfolioMetrics } from '../domain/portfolio.calculator';
+import {
+  buildPortfolioTransaction,
+  calculatePortfolioMetrics,
+} from '../domain/portfolio.calculator';
 import {
   PORTFOLIO_REPOSITORY_PORT,
   type PortfolioRepositoryPort,
@@ -23,7 +26,7 @@ export class GetPortfolioDashboardService {
 
     return {
       metrics: calculatePortfolioMetrics(transactions, currentPrices),
-      transactions,
+      transactions: transactions.map(buildPortfolioTransaction),
       valuedAt,
     };
   }

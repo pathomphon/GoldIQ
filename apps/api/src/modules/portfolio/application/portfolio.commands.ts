@@ -17,3 +17,20 @@ export interface UpdateGoldTransactionCommand {
   readonly fee?: number;
   readonly notes?: string | null;
 }
+
+export interface CreateGoldSaleCommand {
+  readonly purchaseTransactionId: string;
+  readonly soldAt: Date;
+  readonly salePrice: number;
+  readonly goldWeight: number;
+  readonly fee: number;
+  readonly notes: string | null;
+}
+
+export interface UpdateGoldSaleCommand {
+  readonly soldAt?: Date;
+  readonly salePrice?: number;
+  readonly goldWeight?: number;
+  readonly fee?: number;
+  readonly notes?: string | null;
+}

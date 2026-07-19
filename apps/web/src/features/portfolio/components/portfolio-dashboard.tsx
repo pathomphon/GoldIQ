@@ -34,6 +34,12 @@ export function PortfolioDashboard({ result }: PortfolioDashboardProps) {
   const { dashboard } = result;
   const profitDirection =
     dashboard.metrics.profitLoss > 0 ? 'up' : dashboard.metrics.profitLoss < 0 ? 'down' : 'neutral';
+  const realizedDirection =
+    dashboard.metrics.realizedProfitLoss > 0
+      ? 'up'
+      : dashboard.metrics.realizedProfitLoss < 0
+        ? 'down'
+        : 'neutral';
 
   return (
     <div className="app-shell">
@@ -50,6 +56,12 @@ export function PortfolioDashboard({ result }: PortfolioDashboardProps) {
           </Link>
           <Link className="nav-link" href="/buy-plan">
             Buy plan
+          </Link>
+          <Link className="nav-link" href="/analysis">
+            Analysis
+          </Link>
+          <Link className="nav-link" href="/recommendation">
+            Recommendation
           </Link>
           <Link className="nav-link" href="/system-status">
             System status
@@ -86,11 +98,11 @@ export function PortfolioDashboard({ result }: PortfolioDashboardProps) {
                   </small>
                 </article>
                 <article className="metric">
-                  <span>เงินลงทุนรวม</span>
+                  <span>ต้นทุนคงเหลือ</span>
                   <strong>{formatCurrency(dashboard.metrics.totalInvested)}</strong>
                 </article>
                 <article className="metric">
-                  <span>น้ำหนักรวม</span>
+                  <span>น้ำหนักคงเหลือ</span>
                   <strong>{dashboard.metrics.totalGoldWeight.toFixed(6)}</strong>
                   <small>บาททอง</small>
                 </article>
@@ -100,9 +112,27 @@ export function PortfolioDashboard({ result }: PortfolioDashboardProps) {
                   <small>ต่อบาททอง</small>
                 </article>
                 <article className={`metric metric--${profitDirection}`}>
-                  <span>กำไร / ขาดทุน</span>
+                  <span>กำไร / ขาดทุนที่ยังไม่รับรู้</span>
                   <strong>{formatCurrency(dashboard.metrics.profitLoss)}</strong>
                   <small>{dashboard.metrics.profitLossPercentage.toFixed(2)}%</small>
+                </article>
+                <article className={`metric metric--${realizedDirection}`}>
+                  <span>กำไร / ขาดทุนที่รับรู้แล้ว</span>
+                  <strong>{formatCurrency(dashboard.metrics.realizedProfitLoss)}</strong>
+                  <small>{dashboard.metrics.closedLots} ล็อตที่ปิดแล้ว</small>
+                </article>
+                <article className="metric metric--win-rate">
+                  <span>Win Rate</span>
+                  <strong>
+                    {dashboard.metrics.winRate === null
+                      ? '—'
+                      : `${dashboard.metrics.winRate.toFixed(2)}%`}
+                  </strong>
+                  <small>
+                    {dashboard.metrics.winRate === null
+                      ? 'Win Rate จะแสดงเมื่อมีล็อตที่ขายหมด'
+                      : `ชนะ ${dashboard.metrics.winningLots} · แพ้ ${dashboard.metrics.losingLots} · เสมอ ${dashboard.metrics.breakEvenLots}`}
+                  </small>
                 </article>
               </div>
 
@@ -116,7 +146,7 @@ export function PortfolioDashboard({ result }: PortfolioDashboardProps) {
       </main>
 
       <footer>
-        <span>Phase 3</span>
+        <span>Phase 8</span>
         <i aria-hidden="true" />
         <span>Portfolio management</span>
       </footer>
