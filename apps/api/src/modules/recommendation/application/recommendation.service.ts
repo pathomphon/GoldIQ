@@ -24,6 +24,7 @@ export class RecommendationService {
 
   async getRecommendation(): Promise<Recommendation> {
     const shadowEnabled = this.config.get('recommendation.shadowModeEnabled', { infer: true });
+    const mode = this.config.get('recommendation.mode', { infer: true });
     const [market, settings, brief] = await Promise.all([
       this.repository.getContext(),
       this.repository.getSettings(),
@@ -31,6 +32,7 @@ export class RecommendationService {
     ]);
     return applyMarketBriefShadow(buildRecommendation(market, settings), brief, {
       enabled: shadowEnabled,
+      mode,
       minimumConfidence: this.config.get('recommendation.shadowMinConfidence', { infer: true }),
     });
   }

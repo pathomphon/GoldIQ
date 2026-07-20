@@ -1,7 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { GoldPriceBoard } from './gold-price-board';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: vi.fn(),
+  }),
+}));
 
 describe('GoldPriceBoard', () => {
   it('renders normalized current prices', () => {

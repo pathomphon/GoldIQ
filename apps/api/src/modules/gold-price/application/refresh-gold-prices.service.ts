@@ -21,6 +21,8 @@ export class RefreshGoldPricesService {
 
   async execute(): Promise<SaveGoldPricesResult> {
     const quotes = await this.provider.fetchCurrentPrices();
-    return this.repository.saveQuotes(quotes);
+    const result = await this.repository.saveQuotes(quotes);
+    await this.repository.upsertCandles(quotes);
+    return result;
   }
 }

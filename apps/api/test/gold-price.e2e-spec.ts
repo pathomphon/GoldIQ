@@ -5,8 +5,10 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GetCurrentGoldPricesService } from '../src/modules/gold-price/application/get-current-gold-prices.service';
+import { GetGoldPriceCandlesService } from '../src/modules/gold-price/application/get-gold-price-candles.service';
 import { GetGoldPriceHistoryService } from '../src/modules/gold-price/application/get-gold-price-history.service';
 import { GetTechnicalAnalysisService } from '../src/modules/gold-price/application/get-technical-analysis.service';
+import { RefreshGoldPricesService } from '../src/modules/gold-price/application/refresh-gold-prices.service';
 import { GoldPriceController } from '../src/modules/gold-price/presentation/gold-price.controller';
 
 const currentPrice = {
@@ -28,6 +30,8 @@ describe('Gold price API (integration)', () => {
   let app: INestApplication | undefined;
   const current = { execute: vi.fn().mockResolvedValue([currentPrice]) };
   const history = { execute: vi.fn().mockResolvedValue([currentPrice]) };
+  const candles = { execute: vi.fn().mockResolvedValue([]) };
+  const refresh = { execute: vi.fn().mockResolvedValue({ insertedCount: 2 }) };
   const analysis = {
     execute: vi.fn().mockResolvedValue({
       productCode: 'GOLD_BAR_965',
@@ -47,7 +51,9 @@ describe('Gold price API (integration)', () => {
       providers: [
         { provide: GetCurrentGoldPricesService, useValue: current },
         { provide: GetGoldPriceHistoryService, useValue: history },
+        { provide: GetGoldPriceCandlesService, useValue: candles },
         { provide: GetTechnicalAnalysisService, useValue: analysis },
+        { provide: RefreshGoldPricesService, useValue: refresh },
       ],
     }).compile();
 
@@ -86,9 +92,12 @@ describe('Gold price API (integration)', () => {
     expect(history.execute).toHaveBeenCalledWith('GOLD_BAR_965', 25);
 
     await request(httpServer)
-      .get('/api/v1/gold-prices/analysis?productCode=GOLD_BAR_965&limit=100')
-      .expect(200);
-    expect(analysis.execute).toHaveBeenCalledWith('GOLD_BAR_965', 100);
+      .post('/api/v1/gold-prices/refresh')
+      .expect(201)
+      .expect(({ body }: { body: { insertedCount: number } }) => {
+        expect(body.insertedCount).toBe(2);
+      });
+    expect(refresh.execute).toHaveBeenCalled();
   });
 
   it('rejects unsupported product codes', async () => {

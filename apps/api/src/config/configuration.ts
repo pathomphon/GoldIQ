@@ -55,6 +55,9 @@ export function configuration(): AppEnvironment {
     },
     recommendation: {
       shadowModeEnabled: process.env.RECOMMENDATION_SHADOW_MODE_ENABLED === 'true',
+      mode:
+        (process.env.RECOMMENDATION_MODE as AppEnvironment['recommendation']['mode'] | undefined) ??
+        'SHADOW',
       shadowMinConfidence: Number(process.env.RECOMMENDATION_SHADOW_MIN_CONFIDENCE ?? 0.4),
     },
     news: {

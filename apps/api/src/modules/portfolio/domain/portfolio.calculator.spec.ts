@@ -57,6 +57,11 @@ describe('portfolio calculator', () => {
       breakEvenLots: 0,
       closedLots: 0,
       openLots: 2,
+      maxDrawdown: 0,
+      positionSizePercentage: 65.4,
+      riskExposurePercentage: 63.04,
+      suggestedBuyAmount: 20_000,
+      suggestedSellAmount: 23_625,
     });
   });
 
@@ -104,6 +109,11 @@ describe('portfolio calculator', () => {
       breakEvenLots: 0,
       closedLots: 0,
       openLots: 1,
+      maxDrawdown: 0,
+      positionSizePercentage: 43.05,
+      riskExposurePercentage: 41.07,
+      suggestedBuyAmount: 20_000,
+      suggestedSellAmount: 9_450,
     });
   });
 

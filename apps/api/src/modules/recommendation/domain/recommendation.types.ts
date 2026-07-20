@@ -2,11 +2,12 @@ export const RISK_PROFILES = ['CONSERVATIVE', 'BALANCED', 'AGGRESSIVE'] as const
 export type RiskProfile = (typeof RISK_PROFILES)[number];
 
 export const RECOMMENDATION_ACTIONS = [
+  'STRONG_BUY',
   'BUY',
   'WAIT',
   'HOLD',
-  'REVIEW_PROFIT',
-  'SELL_PARTIAL',
+  'SELL',
+  'STRONG_SELL',
 ] as const;
 export type RecommendationAction = (typeof RECOMMENDATION_ACTIONS)[number];
 
@@ -19,12 +20,13 @@ export interface MarketBriefSignal {
 }
 
 export interface RecommendationMarketIntelligence {
-  readonly mode: 'SHADOW';
+  readonly mode: 'SHADOW' | 'LIVE';
   readonly enabled: boolean;
   readonly status: 'DISABLED' | 'UNAVAILABLE' | 'STALE' | 'LOW_CONFIDENCE' | 'ACTIVE';
-  readonly effect: 'NO_CHANGE' | 'SUPPORTS' | 'CAUTION';
+  readonly effect: 'NO_CHANGE' | 'SUPPORTS' | 'CAUTION' | 'LIVE_OVERRIDE_WAIT';
   readonly baseAction: RecommendationAction;
   readonly shadowAction: RecommendationAction;
+  readonly liveAction: RecommendationAction;
   readonly reasons: readonly string[];
   readonly brief: MarketBriefSignal | null;
 }
@@ -56,8 +58,38 @@ export interface RecommendationContext {
   } | null;
 }
 
+export interface TechnicalEvidence {
+  readonly summary: string;
+  readonly rsiSignal?: string;
+  readonly emaSignal?: string;
+  readonly bollingerSignal?: string;
+}
+
+export interface PortfolioEvidence {
+  readonly summary: string;
+  readonly drawdownPercent: number;
+  readonly positionSizePercent: number;
+  readonly averageCostVsPricePercent: number;
+}
+
+export interface NewsEvidence {
+  readonly summary: string;
+  readonly stance: 'BULLISH' | 'NEUTRAL' | 'BEARISH' | 'UNKNOWN';
+  readonly confidence: number;
+}
+
+export interface ExplainableEvidence {
+  readonly technical: TechnicalEvidence;
+  readonly portfolio: PortfolioEvidence;
+  readonly news: NewsEvidence;
+}
+
 export interface Recommendation {
   readonly action: RecommendationAction;
+  readonly why: string;
+  readonly confidence: number;
+  readonly risk: string;
+  readonly evidence: ExplainableEvidence;
   readonly reasons: readonly string[];
   readonly recommendedAmount: number;
   readonly sellPartialPercent: number | null;

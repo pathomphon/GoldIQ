@@ -30,7 +30,9 @@ describe('RefreshNewsService', () => {
     const repository: NewsRepositoryPort = {
       saveArticles,
       findArticles: vi.fn(),
+      findArticleById: vi.fn(),
       findAnalysisCandidates: vi.fn(),
+      saveArticleAnalysis: vi.fn(),
       findLatestBrief: vi.fn(),
       saveBrief: vi.fn(),
     };

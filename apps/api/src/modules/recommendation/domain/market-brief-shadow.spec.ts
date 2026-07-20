@@ -10,9 +10,22 @@ import type {
 function recommendation(action: RecommendationAction): Recommendation {
   return {
     action,
+    why: 'Price-and-risk rule',
+    confidence: 80,
+    risk: 'Test risk',
+    evidence: {
+      technical: { summary: 'Tech' },
+      portfolio: {
+        summary: 'Port',
+        drawdownPercent: 0,
+        positionSizePercent: 20,
+        averageCostVsPricePercent: 0,
+      },
+      news: { summary: 'News', stance: 'UNKNOWN', confidence: 0 },
+    },
     reasons: ['Price-and-risk rule'],
     recommendedAmount: action === 'BUY' ? 10_000 : 0,
-    sellPartialPercent: action === 'SELL_PARTIAL' ? 25 : null,
+    sellPartialPercent: action === 'SELL' ? 25 : null,
     allocation: {
       availableCash: 50_000,
       reservedCash: 10_000,
@@ -95,13 +108,35 @@ describe('applyMarketBriefShadow', () => {
 
   it('cannot override a hard-risk sell action', () => {
     const result = applyMarketBriefShadow(
-      recommendation('SELL_PARTIAL'),
+      recommendation('SELL'),
       brief({ stance: 'BULLISH' }),
       settings,
     );
 
-    expect(result.action).toBe('SELL_PARTIAL');
-    expect(result.marketIntelligence?.shadowAction).toBe('SELL_PARTIAL');
+    expect(result.action).toBe('SELL');
+    expect(result.marketIntelligence?.shadowAction).toBe('SELL');
     expect(result.marketIntelligence?.effect).toBe('NO_CHANGE');
+  });
+
+  it('overrides BUY to WAIT in LIVE mode when brief is bearish', () => {
+    const liveSettings = { enabled: true, mode: 'LIVE' as const, minimumConfidence: 0.4 };
+    const result = applyMarketBriefShadow(
+      recommendation('BUY'),
+      brief({ stance: 'BEARISH' }),
+      liveSettings,
+    );
+
+    expect(result.action).toBe('WAIT');
+    expect(result.marketIntelligence).toMatchObject({
+      mode: 'LIVE',
+      status: 'ACTIVE',
+      effect: 'LIVE_OVERRIDE_WAIT',
+      baseAction: 'BUY',
+      shadowAction: 'WAIT',
+      liveAction: 'WAIT',
+    });
+    expect(result.reasons).toContain(
+      'Bearish market intelligence conservatively deferred this BUY action to WAIT in live mode.',
+    );
   });
 });

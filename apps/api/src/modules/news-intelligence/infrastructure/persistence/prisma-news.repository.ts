@@ -13,6 +13,8 @@ import type {
   NormalizedNewsArticle,
 } from '../../domain/news.types';
 
+import { type ArticleAnalysis, articleAnalysisSchema } from '../../domain/article-analysis.schema';
+
 function toArticle(record: {
   id: string;
   source: string;
@@ -22,10 +24,26 @@ function toArticle(record: {
   sourceTier: string;
   publishedAt: Date;
   fetchedAt: Date;
+  analysis?: Prisma.JsonValue;
 }): NewsArticle {
+  let parsedAnalysis: ArticleAnalysis | null = null;
+  if (record.analysis && typeof record.analysis === 'object') {
+    const parseResult = articleAnalysisSchema.safeParse(record.analysis);
+    if (parseResult.success) {
+      parsedAnalysis = parseResult.data;
+    }
+  }
+
   return {
-    ...record,
+    id: record.id,
+    source: record.source,
+    canonicalUrl: record.canonicalUrl,
+    title: record.title,
+    excerpt: record.excerpt,
     sourceTier: record.sourceTier as NewsSourceTier,
+    publishedAt: record.publishedAt,
+    fetchedAt: record.fetchedAt,
+    analysis: parsedAnalysis,
   };
 }
 
@@ -110,6 +128,13 @@ export class PrismaNewsRepository implements NewsRepositoryPort {
     return records.map(toArticle);
   }
 
+  async findArticleById(id: string): Promise<NewsArticle | null> {
+    const record = await this.prisma.newsArticle.findUnique({
+      where: { id },
+    });
+    return record ? toArticle(record) : null;
+  }
+
   async findAnalysisCandidates(since: Date, limit: number): Promise<readonly NewsArticle[]> {
     const records = await this.prisma.newsArticle.findMany({
       where: { publishedAt: { gte: since } },
@@ -117,6 +142,16 @@ export class PrismaNewsRepository implements NewsRepositoryPort {
       take: limit,
     });
     return records.map(toArticle);
+  }
+
+  async saveArticleAnalysis(id: string, analysis: ArticleAnalysis): Promise<NewsArticle> {
+    const record = await this.prisma.newsArticle.update({
+      where: { id },
+      data: {
+        analysis: JSON.parse(JSON.stringify(analysis)) as Prisma.InputJsonObject,
+      },
+    });
+    return toArticle(record);
   }
 
   async findLatestBrief(): Promise<MarketBrief | null> {

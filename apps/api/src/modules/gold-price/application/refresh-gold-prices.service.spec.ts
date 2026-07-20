@@ -25,13 +25,17 @@ describe('RefreshGoldPricesService', () => {
       inserted: 1,
       duplicates: 0,
     });
+    const upsertCandles = vi.fn().mockResolvedValue(undefined);
     const provider: GoldPriceProviderPort = {
       fetchCurrentPrices,
     };
     const repository: GoldPriceRepositoryPort = {
       saveQuotes,
+      upsertCandles,
       findCurrentPrices: vi.fn(),
       findHistory: vi.fn(),
+      findCandles: vi.fn(),
+      purgeOldRawPrices: vi.fn(),
     };
     const service = new RefreshGoldPricesService(provider, repository);
 
@@ -42,5 +46,6 @@ describe('RefreshGoldPricesService', () => {
     });
     expect(fetchCurrentPrices).toHaveBeenCalledOnce();
     expect(saveQuotes).toHaveBeenCalledWith([quote]);
+    expect(upsertCandles).toHaveBeenCalledWith([quote]);
   });
 });

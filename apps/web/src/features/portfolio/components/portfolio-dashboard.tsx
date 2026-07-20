@@ -134,6 +134,42 @@ export function PortfolioDashboard({ result }: PortfolioDashboardProps) {
                       : `ชนะ ${dashboard.metrics.winningLots} · แพ้ ${dashboard.metrics.losingLots} · เสมอ ${dashboard.metrics.breakEvenLots}`}
                   </small>
                 </article>
+                <article className="metric">
+                  <span>Max Drawdown</span>
+                  <strong>
+                    {dashboard.metrics.maxDrawdown !== undefined
+                      ? `${dashboard.metrics.maxDrawdown.toFixed(2)}%`
+                      : '0.00%'}
+                  </strong>
+                  <small>จุดลดลงสูงสุดเทียบต้นทุน</small>
+                </article>
+                <article className="metric">
+                  <span>Position Size / Risk Exposure</span>
+                  <strong>
+                    {dashboard.metrics.positionSizePercentage !== undefined
+                      ? `${dashboard.metrics.positionSizePercentage.toFixed(1)}%`
+                      : '—'}
+                  </strong>
+                  <small>
+                    Risk Exposure:{' '}
+                    {dashboard.metrics.riskExposurePercentage !== undefined
+                      ? `${dashboard.metrics.riskExposurePercentage.toFixed(1)}%`
+                      : '—'}
+                  </small>
+                </article>
+                <article className="metric">
+                  <span>คำแนะนำซื้อ / ขายที่แนะนำ</span>
+                  <strong>
+                    {dashboard.metrics.suggestedBuyAmount
+                      ? `ซื้อ ${formatCurrency(dashboard.metrics.suggestedBuyAmount)}`
+                      : '—'}
+                  </strong>
+                  <small>
+                    {dashboard.metrics.suggestedSellAmount
+                      ? `ขายทำกำไร ${formatCurrency(dashboard.metrics.suggestedSellAmount)}`
+                      : 'ถือสถานะไว้'}
+                  </small>
+                </article>
               </div>
 
               <TransactionManager

@@ -13,13 +13,16 @@ const environmentSchema = z.object({
     .url()
     .default('postgresql://goldiq:goldiq@localhost:5432/goldiq?schema=public'),
   REDIS_URL: z.string().url().default('redis://localhost:6379'),
-  HSH_PRICE_965_URL: z.string().url().default('http://localhost:4010/api/values/getprice/'),
-  HSH_PRICE_9999_URL: z.string().url().default('http://localhost:4010/api/values'),
+  HSH_PRICE_965_URL: z
+    .string()
+    .url()
+    .default('https://apicheckpricev3.huasengheng.com/api/values/getprice/'),
+  HSH_PRICE_9999_URL: z.string().url().default('https://apigoldprice99.huasengheng.com/api/values'),
   HSH_API_TOKEN: z.string().optional(),
   HSH_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(5_000),
   HSH_REQUEST_MAX_RETRIES: z.coerce.number().int().min(0).max(10).default(3),
   HSH_RETRY_BASE_DELAY_MS: z.coerce.number().int().positive().default(250),
-  HSH_POLL_CRON: z.string().min(1).default('*/1 * * * *'),
+  HSH_POLL_CRON: z.string().min(1).default('*/15 * * * * *'),
   HSH_SCHEDULER_ENABLED: z
     .enum(['true', 'false'])
     .default('true')
@@ -37,6 +40,7 @@ const environmentSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  RECOMMENDATION_MODE: z.enum(['SHADOW', 'LIVE']).default('SHADOW'),
   RECOMMENDATION_SHADOW_MIN_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.4),
   NEWS_ENABLED: z
     .enum(['true', 'false'])
@@ -130,6 +134,7 @@ export interface AppEnvironment {
   };
   recommendation: {
     shadowModeEnabled: boolean;
+    mode: 'SHADOW' | 'LIVE';
     shadowMinConfidence: number;
   };
   news: {

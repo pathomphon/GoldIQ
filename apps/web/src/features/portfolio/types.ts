@@ -51,6 +51,11 @@ export interface PortfolioMetrics {
   readonly breakEvenLots: number;
   readonly closedLots: number;
   readonly openLots: number;
+  readonly maxDrawdown?: number;
+  readonly positionSizePercentage?: number;
+  readonly riskExposurePercentage?: number;
+  readonly suggestedBuyAmount?: number;
+  readonly suggestedSellAmount?: number;
 }
 
 export interface PortfolioDashboardData {

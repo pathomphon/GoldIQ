@@ -63,7 +63,9 @@ describe('GenerateMarketBriefService', () => {
     const repository: NewsRepositoryPort = {
       saveArticles: vi.fn(),
       findArticles: vi.fn(),
+      findArticleById: vi.fn(),
       findAnalysisCandidates: vi.fn().mockResolvedValue([article]),
+      saveArticleAnalysis: vi.fn(),
       findLatestBrief: vi.fn().mockResolvedValue(null),
       saveBrief,
     };
@@ -87,7 +89,9 @@ describe('GenerateMarketBriefService', () => {
     const repository: NewsRepositoryPort = {
       saveArticles: vi.fn(),
       findArticles: vi.fn(),
+      findArticleById: vi.fn(),
       findAnalysisCandidates: vi.fn().mockResolvedValue([article]),
+      saveArticleAnalysis: vi.fn(),
       findLatestBrief: vi.fn().mockResolvedValue({
         generatedAt: new Date('2026-07-19T09:10:00Z'),
         promptVersion: 'gold-research-v6-th-intergold',
@@ -108,7 +112,9 @@ describe('GenerateMarketBriefService', () => {
     const repository: NewsRepositoryPort = {
       saveArticles: vi.fn(),
       findArticles: vi.fn(),
+      findArticleById: vi.fn(),
       findAnalysisCandidates: vi.fn().mockResolvedValue([article]),
+      saveArticleAnalysis: vi.fn(),
       findLatestBrief: vi.fn().mockResolvedValue({
         generatedAt: new Date('2026-07-19T09:10:00Z'),
         promptVersion: 'gold-research-v2',

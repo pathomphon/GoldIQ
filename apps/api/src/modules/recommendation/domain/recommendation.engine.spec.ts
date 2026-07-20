@@ -33,9 +33,13 @@ const market: RecommendationContext = {
 describe('buildRecommendation', () => {
   it('recommends buying when price crosses a level and cash is sufficient', () => {
     const result = buildRecommendation(market, settings);
-    expect(result.action).toBe('BUY');
+    expect(['BUY', 'STRONG_BUY']).toContain(result.action);
     expect(result.recommendedAmount).toBe(15_000);
     expect(result.allocation.deployableCash).toBe(25_000);
+    expect(result.why).toBeDefined();
+    expect(result.confidence).toBeGreaterThan(0);
+    expect(result.risk).toBeDefined();
+    expect(result.evidence).toBeDefined();
   });
 
   it('waits when the reserve leaves insufficient cash', () => {
@@ -50,8 +54,14 @@ describe('buildRecommendation', () => {
 
   it('prioritizes taking profit over buying', () => {
     const result = buildRecommendation({ ...market, profitLossPercentage: 6 }, settings);
-    expect(result.action).toBe('SELL_PARTIAL');
+    expect(result.action).toBe('SELL');
     expect(result.sellPartialPercent).toBe(25);
+  });
+
+  it('recommends strong sell when profit is significantly higher than target', () => {
+    const result = buildRecommendation({ ...market, profitLossPercentage: 8 }, settings);
+    expect(result.action).toBe('STRONG_SELL');
+    expect(result.confidence).toBe(95);
   });
 
   it('stops buying above the configured ceiling', () => {

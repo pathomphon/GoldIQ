@@ -66,88 +66,90 @@ export function RiskSettingsForm({ settings }: { readonly settings: RiskSettings
   }
 
   return (
-    <form className="risk-settings-form" onSubmit={submit}>
-      <label>
-        โปรไฟล์ความเสี่ยง
-        <select
-          onChange={(event) => update('riskProfile', event.target.value as RiskProfile)}
-          value={form.riskProfile}
-        >
-          <option value="CONSERVATIVE">ระมัดระวัง</option>
-          <option value="BALANCED">ปานกลาง</option>
-          <option value="AGGRESSIVE">เชิงรุก</option>
-        </select>
-      </label>
-      <label>
-        เงินสดที่มีอยู่
-        <input
-          min="0"
-          onChange={(event) => update('availableCash', event.target.value)}
-          required
-          step="0.01"
-          type="number"
-          value={form.availableCash}
-        />
-      </label>
-      <label>
-        เงินสำรองขั้นต่ำ
-        <input
-          min="0"
-          onChange={(event) => update('minimumCashReserve', event.target.value)}
-          required
-          step="0.01"
-          type="number"
-          value={form.minimumCashReserve}
-        />
-      </label>
-      <label>
-        สัดส่วนการจัดสรรสูงสุด (%)
-        <input
-          max="100"
-          min="1"
-          onChange={(event) => update('maxAllocationPercent', event.target.value)}
-          required
-          step="0.01"
-          type="number"
-          value={form.maxAllocationPercent}
-        />
-      </label>
-      <label>
-        เป้าหมายกำไร (%)
-        <input
-          max="100"
-          min="0.01"
-          onChange={(event) => update('profitTargetPercent', event.target.value)}
-          required
-          step="0.01"
-          type="number"
-          value={form.profitTargetPercent}
-        />
-      </label>
-      <label>
-        ขายทำกำไรบางส่วน (%)
-        <input
-          max="100"
-          min="1"
-          onChange={(event) => update('sellPartialPercent', event.target.value)}
-          required
-          step="0.01"
-          type="number"
-          value={form.sellPartialPercent}
-        />
-      </label>
-      <label>
-        เพดานหยุดซื้อ
-        <input
-          onChange={(event) => update('stopBuyAbovePrice', event.target.value)}
-          placeholder="ไม่กำหนด"
-          step="0.01"
-          type="number"
-          value={form.stopBuyAbovePrice}
-        />
-      </label>
-      <div className="risk-settings-submit">
-        <button className="button button--primary" disabled={submitting}>
+    <form className="rec-risk-form" onSubmit={submit}>
+      <div className="rec-risk-grid">
+        <label className="rec-risk-field">
+          <span>โปรไฟล์ความเสี่ยง</span>
+          <select
+            onChange={(event) => update('riskProfile', event.target.value as RiskProfile)}
+            value={form.riskProfile}
+          >
+            <option value="CONSERVATIVE">ระมัดระวัง</option>
+            <option value="BALANCED">ปานกลาง</option>
+            <option value="AGGRESSIVE">เชิงรุก</option>
+          </select>
+        </label>
+        <label className="rec-risk-field">
+          <span>เงินสดที่มีอยู่ (฿)</span>
+          <input
+            min="0"
+            onChange={(event) => update('availableCash', event.target.value)}
+            required
+            step="0.01"
+            type="number"
+            value={form.availableCash}
+          />
+        </label>
+        <label className="rec-risk-field">
+          <span>เงินสำรองขั้นต่ำ (฿)</span>
+          <input
+            min="0"
+            onChange={(event) => update('minimumCashReserve', event.target.value)}
+            required
+            step="0.01"
+            type="number"
+            value={form.minimumCashReserve}
+          />
+        </label>
+        <label className="rec-risk-field">
+          <span>จัดสรรสูงสุด (%)</span>
+          <input
+            max="100"
+            min="1"
+            onChange={(event) => update('maxAllocationPercent', event.target.value)}
+            required
+            step="0.01"
+            type="number"
+            value={form.maxAllocationPercent}
+          />
+        </label>
+        <label className="rec-risk-field">
+          <span>เป้าหมายกำไร (%)</span>
+          <input
+            max="100"
+            min="0.01"
+            onChange={(event) => update('profitTargetPercent', event.target.value)}
+            required
+            step="0.01"
+            type="number"
+            value={form.profitTargetPercent}
+          />
+        </label>
+        <label className="rec-risk-field">
+          <span>ขายกำไรบางส่วน (%)</span>
+          <input
+            max="100"
+            min="1"
+            onChange={(event) => update('sellPartialPercent', event.target.value)}
+            required
+            step="0.01"
+            type="number"
+            value={form.sellPartialPercent}
+          />
+        </label>
+        <label className="rec-risk-field rec-risk-field--wide">
+          <span>เพดานหยุดซื้อ (฿) — ไม่บังคับ</span>
+          <input
+            onChange={(event) => update('stopBuyAbovePrice', event.target.value)}
+            placeholder="ไม่กำหนด"
+            step="0.01"
+            type="number"
+            value={form.stopBuyAbovePrice}
+          />
+        </label>
+      </div>
+      <div className="rec-risk-submit">
+        <button className="button button--primary" disabled={submitting} type="submit">
           {submitting ? 'กำลังบันทึก…' : 'บันทึกการตั้งค่า'}
         </button>
         {message ? (
@@ -158,4 +160,5 @@ export function RiskSettingsForm({ settings }: { readonly settings: RiskSettings
       </div>
     </form>
   );
+
 }

@@ -61,8 +61,8 @@ services:
       API_CORS_ORIGINS: http://localhost:${WEB_PORT:-3000}
       DATABASE_URL: postgresql://${POSTGRES_USER:-goldiq}:${POSTGRES_PASSWORD:-goldiq-local-only}@postgres:5432/${POSTGRES_DB:-goldiq}?schema=public
       REDIS_URL: redis://redis:6379
-      HSH_PRICE_965_URL: http://mock-hsh:4010/api/values/getprice/
-      HSH_PRICE_9999_URL: http://mock-hsh:4010/api/values
+      HSH_PRICE_965_URL: ${HSH_PRICE_965_URL:-https://apicheckpricev3.huasengheng.com/api/values/getprice/}
+      HSH_PRICE_9999_URL: ${HSH_PRICE_9999_URL:-https://apigoldprice99.huasengheng.com/api/values}
       HSH_API_TOKEN: ${HSH_API_TOKEN:-}
       HSH_REQUEST_MAX_RETRIES: ${HSH_REQUEST_MAX_RETRIES:-3}
       HSH_RETRY_BASE_DELAY_MS: ${HSH_RETRY_BASE_DELAY_MS:-250}

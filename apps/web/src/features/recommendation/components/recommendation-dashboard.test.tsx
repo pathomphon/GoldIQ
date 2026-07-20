@@ -47,6 +47,7 @@ describe('RecommendationDashboard', () => {
               effect: 'SUPPORTS',
               baseAction: 'WAIT',
               shadowAction: 'WAIT',
+              liveAction: 'WAIT',
               reasons: ['Bearish evidence supports keeping the conservative WAIT action.'],
               brief: {
                 id: 'brief-1',

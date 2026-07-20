@@ -23,10 +23,18 @@ describe('calculateTechnicalAnalysis', () => {
     const result = calculateTechnicalAnalysis('GOLD_BAR_965', history.toReversed());
 
     expect(result.samples).toHaveLength(40);
+    expect(result.sma['20']).toBeGreaterThan(63_100);
+    expect(result.sma['50']).toBeNull();
     expect(result.ema['20']).toBeGreaterThan(63_100);
     expect(result.ema['50']).toBeNull();
     expect(result.rsi).toBe(100);
     expect(result.macd).not.toBeNull();
+    expect(result.bollingerBands).not.toBeNull();
+    expect(result.bollingerBands?.middle).toBeGreaterThan(63_100);
+    expect(result.bollingerBands?.upper).toBeGreaterThan(result.bollingerBands?.lower ?? 0);
+    expect(result.atr).toBeGreaterThan(0);
+    expect(result.pivotPoints).not.toBeNull();
+    expect(result.pivotPoints?.pivot).toBeGreaterThan(63_000);
     expect(result.support).toEqual([63_100, 63_110, 63_120]);
     expect(result.resistance).toEqual([63_490, 63_480, 63_470]);
   });

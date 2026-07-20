@@ -1,3 +1,5 @@
+import type { ArticleAnalysis } from './article-analysis.schema';
+
 export type NewsSourceTier = 'PRIMARY' | 'SECONDARY';
 
 export interface NormalizedNewsArticle {
@@ -22,6 +24,7 @@ export interface NewsArticle {
   readonly sourceTier: NewsSourceTier;
   readonly publishedAt: Date;
   readonly fetchedAt: Date;
+  readonly analysis?: ArticleAnalysis | null;
 }
 
 export type MarketBriefStance = 'BULLISH' | 'NEUTRAL' | 'BEARISH';

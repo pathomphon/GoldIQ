@@ -29,7 +29,7 @@ describe('AnalysisDashboard', () => {
 
     expect(screen.getByRole('heading', { name: 'วิเคราะห์ราคาทอง' })).toBeInTheDocument();
     expect(
-      screen.getByRole('img', { name: 'กราฟประวัติราคารับซื้อและขายออก' }),
+      screen.getByRole('img', { name: /กราฟประวัติราคารับซื้อและขายออก/ }),
     ).toBeInTheDocument();
     expect(screen.getAllByText('ข้อมูลยังไม่เพียงพอ')).not.toHaveLength(0);
   });

@@ -88,6 +88,7 @@ export function buildPortfolioTransaction(transaction: GoldTransaction): Portfol
 export function calculatePortfolioMetrics(
   transactions: readonly GoldTransaction[],
   currentPrices: readonly CurrentBuyPrice[],
+  availableCash = 50_000,
 ): PortfolioMetrics {
   const priceByProduct = new Map(currentPrices.map((price) => [price.productCode, price.buyPrice]));
   let totalInvested = 0;
@@ -128,6 +129,20 @@ export function calculatePortfolioMetrics(
   const profitLoss = currentValue - totalInvested;
   const averageCost = totalGoldWeight > 0 ? totalInvested / totalGoldWeight : 0;
 
+  const maxDrawdown =
+    totalInvested > 0 && profitLoss < 0 ? round((Math.abs(profitLoss) / totalInvested) * 100) : 0;
+  const totalAssets = currentValue + Math.max(0, availableCash);
+  const positionSizePercentage = totalAssets > 0 ? round((currentValue / totalAssets) * 100) : 0;
+  const riskExposurePercentage =
+    totalAssets > 0
+      ? round(Math.min(100, Math.max(0, (totalInvested / totalAssets) * 100 + maxDrawdown * 0.5)))
+      : 0;
+
+  const suggestedBuyAmount =
+    availableCash >= 10_000 ? round(Math.min(availableCash * 0.4, 20_000)) : 0;
+
+  const suggestedSellAmount = profitLoss > 0 ? round(currentValue * 0.25) : 0;
+
   return {
     totalInvested: round(totalInvested),
     totalGoldWeight: round(totalGoldWeight, 6),
@@ -146,5 +161,10 @@ export function calculatePortfolioMetrics(
     breakEvenLots,
     closedLots,
     openLots,
+    maxDrawdown,
+    positionSizePercentage,
+    riskExposurePercentage,
+    suggestedBuyAmount,
+    suggestedSellAmount,
   };
 }

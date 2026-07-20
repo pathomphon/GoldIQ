@@ -27,6 +27,7 @@ model GoldProduct {
   createdAt          DateTime    @default(now()) @map("created_at")
   updatedAt          DateTime    @updatedAt @map("updated_at")
   prices             GoldPrice[]
+  candles            GoldPriceCandle[]
   transactions       GoldTransaction[]
   buyPlans           BuyPlan[]
 
@@ -153,18 +154,50 @@ model GoldPrice {
   @@map("gold_prices")
 }
 
+enum CandleResolution {
+  M1
+  M5
+  M15
+  H1
+  D1
+}
+
+model GoldPriceCandle {
+  id          String           @id @default(cuid())
+  productId   String           @map("product_id")
+  resolution  CandleResolution
+  bucketStart DateTime         @map("bucket_start")
+  openBuy     Decimal          @map("open_buy") @db.Decimal(12, 2)
+  highBuy     Decimal          @map("high_buy") @db.Decimal(12, 2)
+  lowBuy      Decimal          @map("low_buy") @db.Decimal(12, 2)
+  closeBuy    Decimal          @map("close_buy") @db.Decimal(12, 2)
+  openSell    Decimal          @map("open_sell") @db.Decimal(12, 2)
+  highSell    Decimal          @map("high_sell") @db.Decimal(12, 2)
+  lowSell     Decimal          @map("low_sell") @db.Decimal(12, 2)
+  closeSell   Decimal          @map("close_sell") @db.Decimal(12, 2)
+  ticksCount  Int              @default(1) @map("ticks_count")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  product     GoldProduct      @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, resolution, bucketStart])
+  @@index([productId, resolution, bucketStart(sort: Desc)])
+  @@map("gold_price_candles")
+}
+
 model NewsArticle {
-  id           String   @id @default(cuid())
-  source       String
-  externalId   String   @map("external_id")
-  canonicalUrl String   @map("canonical_url")
-  urlHash      String   @unique @map("url_hash")
-  title        String
-  excerpt      String?
-  sourceTier   String   @default("PRIMARY") @map("source_tier")
-  publishedAt  DateTime @map("published_at")
-  fetchedAt    DateTime @default(now()) @map("fetched_at")
-  rawHash      String                @map("raw_hash")
+  id            String                @id @default(cuid())
+  source        String
+  externalId    String                @map("external_id")
+  canonicalUrl  String                @map("canonical_url")
+  urlHash       String                @unique @map("url_hash")
+  title         String
+  excerpt       String?
+  sourceTier    String                @default("PRIMARY") @map("source_tier")
+  publishedAt   DateTime              @map("published_at")
+  fetchedAt     DateTime              @default(now()) @map("fetched_at")
+  rawHash       String                @map("raw_hash")
+  analysis      Json?                 @map("analysis")
   briefEvidence MarketBriefEvidence[]
 
   @@unique([source, externalId])
