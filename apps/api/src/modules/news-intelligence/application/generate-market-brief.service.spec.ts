@@ -12,7 +12,7 @@ const article: NewsArticle = {
   id: 'news-1',
   source: 'FEDERALRESERVE.GOV',
   canonicalUrl: 'https://www.federalreserve.gov/news/one',
-  title: 'Policy update',
+  title: 'Federal Reserve interest rate policy update',
   excerpt: null,
   sourceTier: 'PRIMARY',
   publishedAt: new Date('2026-07-19T09:00:00Z'),
@@ -37,6 +37,7 @@ function config(): ConfigService<AppEnvironment, true> {
     'researchAgent.windowHours': 168,
     'researchAgent.maxArticles': 40,
     'researchAgent.briefTtlMinutes': 60,
+    'researchAgent.promptVersion': 'gold-research-v6-th-intergold',
   };
   return {
     get: vi.fn((key: string) => values[key]),
@@ -89,6 +90,7 @@ describe('GenerateMarketBriefService', () => {
       findAnalysisCandidates: vi.fn().mockResolvedValue([article]),
       findLatestBrief: vi.fn().mockResolvedValue({
         generatedAt: new Date('2026-07-19T09:10:00Z'),
+        promptVersion: 'gold-research-v6-th-intergold',
       }),
       saveBrief: vi.fn(),
     };
@@ -99,5 +101,26 @@ describe('GenerateMarketBriefService', () => {
 
     expect(result.status).toBe('SKIPPED_NO_CHANGES');
     expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it('regenerates a brief when the prompt version changes', async () => {
+    const analyze = vi.fn().mockResolvedValue(analysis);
+    const repository: NewsRepositoryPort = {
+      saveArticles: vi.fn(),
+      findArticles: vi.fn(),
+      findAnalysisCandidates: vi.fn().mockResolvedValue([article]),
+      findLatestBrief: vi.fn().mockResolvedValue({
+        generatedAt: new Date('2026-07-19T09:10:00Z'),
+        promptVersion: 'gold-research-v2',
+      }),
+      saveBrief: vi.fn().mockResolvedValue({}),
+    };
+
+    const result = await new GenerateMarketBriefService({ analyze }, repository, config()).execute(
+      now,
+    );
+
+    expect(result.status).toBe('CREATED');
+    expect(analyze).toHaveBeenCalledOnce();
   });
 });

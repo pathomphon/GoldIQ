@@ -91,6 +91,31 @@ export function RecommendationDashboard({
                 </ul>
               </div>
             </section>
+            <section
+              className={`recommendation-shadow shadow-${recommendation.marketIntelligence.effect.toLowerCase()}`}
+              aria-labelledby="recommendation-shadow-title"
+            >
+              <div>
+                <p className="eyebrow">MARKET INTELLIGENCE</p>
+                <h2 id="recommendation-shadow-title">Conservative shadow mode</h2>
+                <p>ข่าวใช้เป็นสัญญาณประกอบเท่านั้น และไม่เปลี่ยนคำแนะนำหลักหรือกฎความเสี่ยง</p>
+              </div>
+              <div className="recommendation-shadow__signal">
+                <span>{recommendation.marketIntelligence.status}</span>
+                <strong>
+                  {recommendation.marketIntelligence.baseAction}
+                  <b aria-hidden="true">→</b>
+                  {recommendation.marketIntelligence.shadowAction}
+                </strong>
+                <p>{recommendation.marketIntelligence.reasons[0]}</p>
+                {recommendation.marketIntelligence.brief ? (
+                  <small>
+                    {recommendation.marketIntelligence.brief.stance} · confidence{' '}
+                    {(recommendation.marketIntelligence.brief.confidence * 100).toFixed(0)}%
+                  </small>
+                ) : null}
+              </div>
+            </section>
             <section className="recommendation-metrics" aria-label="ข้อมูลประกอบคำแนะนำ">
               <article>
                 <span>ราคาทองขายออกปัจจุบัน</span>

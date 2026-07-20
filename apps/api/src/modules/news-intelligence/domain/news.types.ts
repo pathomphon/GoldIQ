@@ -1,4 +1,4 @@
-export type NewsSourceTier = 'PRIMARY';
+export type NewsSourceTier = 'PRIMARY' | 'SECONDARY';
 
 export interface NormalizedNewsArticle {
   readonly source: string;

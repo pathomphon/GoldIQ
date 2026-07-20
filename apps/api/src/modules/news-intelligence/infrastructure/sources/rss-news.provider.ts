@@ -3,7 +3,15 @@ import { ConfigService } from '@nestjs/config';
 
 import type { AppEnvironment } from '../../../../config/environment.schema';
 import type { NewsProviderPort } from '../../domain/news-provider.port';
-import type { FetchNewsResult, NormalizedNewsArticle } from '../../domain/news.types';
+import type {
+  FetchNewsResult,
+  NewsSourceTier,
+  NormalizedNewsArticle,
+} from '../../domain/news.types';
+import {
+  normalizeFinnomenaGoldSpotReference,
+  normalizeFinnomenaThaiGoldReference,
+} from './finnomena-market-reference.normalizer';
 import { normalizeRssOrAtomFeed } from './rss-news.normalizer';
 
 const ALLOWED_SOURCE_DOMAINS = [
@@ -14,6 +22,8 @@ const ALLOWED_SOURCE_DOMAINS = [
   'cftc.gov',
   'bot.or.th',
   'ecb.europa.eu',
+  'intergold.co.th',
+  'finnomena.com',
 ] as const;
 
 function wait(delayMs: number): Promise<void> {
@@ -37,6 +47,43 @@ function validatedUrl(value: string): URL {
 
 function sourceName(url: URL): string {
   return url.hostname.replace(/^www\./, '').toUpperCase();
+}
+
+function sourceTier(url: URL): NewsSourceTier {
+  const hostname = url.hostname.toLowerCase();
+  return hostname === 'intergold.co.th' ||
+    hostname.endsWith('.intergold.co.th') ||
+    hostname === 'finnomena.com' ||
+    hostname.endsWith('.finnomena.com')
+    ? 'SECONDARY'
+    : 'PRIMARY';
+}
+
+function requiredCategory(url: URL): string | undefined {
+  const hostname = url.hostname.toLowerCase();
+  return hostname === 'intergold.co.th' || hostname.endsWith('.intergold.co.th')
+    ? 'บทวิเคราะห์ราคาทองคำ'
+    : undefined;
+}
+
+function normalizeSource(
+  url: URL,
+  body: string,
+  fetchedAt: Date,
+): readonly NormalizedNewsArticle[] {
+  if (url.pathname === '/fn3/api/gold/trader/present') {
+    return normalizeFinnomenaThaiGoldReference(JSON.parse(body) as unknown, fetchedAt);
+  }
+  if (url.pathname === '/fn3/api/v2/gold/spot/historical/C:XAUUSD/prev') {
+    return normalizeFinnomenaGoldSpotReference(JSON.parse(body) as unknown, fetchedAt);
+  }
+  return normalizeRssOrAtomFeed(
+    body,
+    sourceName(url),
+    fetchedAt,
+    sourceTier(url),
+    requiredCategory(url),
+  );
 }
 
 async function readLimitedText(response: Response, maxBytes: number): Promise<string> {
@@ -86,8 +133,8 @@ export class RssNewsProvider implements NewsProviderPort {
     const results = await Promise.allSettled(
       this.sourceUrls.map(async (url) => {
         const fetchedAt = new Date();
-        const xml = await this.requestFeed(url);
-        return normalizeRssOrAtomFeed(xml, sourceName(url), fetchedAt);
+        const body = await this.requestSource(url);
+        return normalizeSource(url, body, fetchedAt);
       }),
     );
     const articles: NormalizedNewsArticle[] = [];
@@ -113,20 +160,21 @@ export class RssNewsProvider implements NewsProviderPort {
     };
   }
 
-  private async requestFeed(url: URL): Promise<string> {
+  private async requestSource(url: URL): Promise<string> {
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt += 1) {
       try {
         const response = await fetch(url, {
           headers: {
-            accept: 'application/atom+xml, application/rss+xml, application/xml, text/xml',
+            accept:
+              'application/json, application/atom+xml, application/rss+xml, application/xml, text/xml',
             'user-agent': 'GoldIQ/0.1 news-research',
           },
           redirect: 'error',
           signal: AbortSignal.timeout(this.timeoutMs),
         });
-        if (!response.ok) throw new Error(`News request failed with ${response.status}`);
+        if (!response.ok) throw new Error(`Research source request failed with ${response.status}`);
         return await readLimitedText(response, this.maxFeedBytes);
       } catch (error: unknown) {
         lastError = error;
@@ -135,6 +183,6 @@ export class RssNewsProvider implements NewsProviderPort {
     }
 
     const message = lastError instanceof Error ? lastError.message : 'Unknown provider error';
-    throw new Error(`Unable to fetch news feed: ${message}`);
+    throw new Error(`Unable to fetch research source: ${message}`);
   }
 }

@@ -191,6 +191,64 @@ a {
   font-size: 14px;
 }
 
+.recommendation-shadow {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: clamp(32px, 6vw, 92px);
+  margin-top: 28px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  padding: 24px 32px;
+}
+
+.recommendation-shadow.shadow-supports {
+  border-left-color: var(--healthy);
+}
+
+.recommendation-shadow.shadow-caution {
+  border-left-color: var(--danger);
+}
+
+.recommendation-shadow h2,
+.recommendation-shadow p {
+  margin: 0;
+}
+
+.recommendation-shadow h2 {
+  margin-top: 7px;
+  font-size: 21px;
+}
+
+.recommendation-shadow > div:first-child > p:last-child,
+.recommendation-shadow__signal p,
+.recommendation-shadow__signal small,
+.recommendation-shadow__signal span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.recommendation-shadow > div:first-child > p:last-child {
+  margin-top: 8px;
+}
+
+.recommendation-shadow__signal {
+  display: grid;
+  gap: 8px;
+}
+
+.recommendation-shadow__signal strong {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.recommendation-shadow__signal b {
+  color: var(--muted);
+  font-weight: 400;
+}
+
 .recommendation-metrics {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1365,7 +1423,8 @@ footer i {
   }
 
   .recommendation-heading,
-  .recommendation-hero {
+  .recommendation-hero,
+  .recommendation-shadow {
     display: block;
   }
 
@@ -1390,6 +1449,14 @@ footer i {
 
   .recommendation-reasons {
     padding: 24px 0 0;
+  }
+
+  .recommendation-shadow {
+    padding: 22px 20px;
+  }
+
+  .recommendation-shadow__signal {
+    margin-top: 22px;
   }
 
   .recommendation-metrics {

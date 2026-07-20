@@ -33,13 +33,32 @@ const environmentSchema = z.object({
     .default('true')
     .transform((value) => value === 'true'),
   BUY_PLAN_ALERT_LOCK_TTL_MS: z.coerce.number().int().positive().default(25_000),
+  RECOMMENDATION_SHADOW_MODE_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  RECOMMENDATION_SHADOW_MIN_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.4),
   NEWS_ENABLED: z
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
   NEWS_REFRESH_CRON: z.string().min(1).default('0 */15 * * * *'),
   NEWS_REFRESH_LOCK_TTL_MS: z.coerce.number().int().positive().default(120_000),
-  NEWS_SOURCE_URLS: z.string().default('https://www.federalreserve.gov/feeds/press_all.xml'),
+  NEWS_SOURCE_URLS: z
+    .string()
+    .default(
+      [
+        'https://www.federalreserve.gov/feeds/press_all.xml',
+        'https://www.bls.gov/feed/cpi.rss',
+        'https://www.bls.gov/feed/empsit.rss',
+        'https://www.ecb.europa.eu/rss/press.html',
+        'https://www.cftc.gov/RSS/RSSGP/rssgp.xml',
+        'https://www.intergold.co.th/investor_core/feed/',
+        'https://www.finnomena.com/feed/?tag=gold',
+        'https://www.finnomena.com/fn3/api/gold/trader/present',
+        'https://www.finnomena.com/fn3/api/v2/gold/spot/historical/C:XAUUSD/prev',
+      ].join(','),
+    ),
   NEWS_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   NEWS_REQUEST_MAX_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
   NEWS_RETRY_BASE_DELAY_MS: z.coerce.number().int().positive().default(500),
@@ -52,12 +71,14 @@ const environmentSchema = z.object({
     .transform((value) => value === 'true'),
   RESEARCH_AGENT_CRON: z.string().min(1).default('0 5 * * * *'),
   RESEARCH_AGENT_LOCK_TTL_MS: z.coerce.number().int().positive().default(120_000),
+  RESEARCH_AGENT_PROVIDER: z.enum(['openai', 'ollama']).default('openai'),
   RESEARCH_AGENT_MODEL: z.string().min(1).default('gpt-5.6-luna'),
   RESEARCH_AGENT_TIMEOUT_MS: z.coerce.number().int().positive().default(45_000),
   RESEARCH_AGENT_WINDOW_HOURS: z.coerce.number().int().min(1).max(720).default(168),
   RESEARCH_AGENT_MAX_ARTICLES: z.coerce.number().int().min(1).max(100).default(40),
   RESEARCH_AGENT_BRIEF_TTL_MINUTES: z.coerce.number().int().min(5).max(1_440).default(60),
-  RESEARCH_AGENT_PROMPT_VERSION: z.string().min(1).default('gold-research-v1'),
+  RESEARCH_AGENT_PROMPT_VERSION: z.string().min(1).default('gold-research-v7-th-finnomena'),
+  OLLAMA_BASE_URL: z.string().url().default('http://localhost:11434'),
   OPENAI_API_KEY: z.string().min(1).optional().or(z.literal('')),
   LINE_CHANNEL_ACCESS_TOKEN: z.string().optional(),
   LINE_USER_ID: z.string().optional(),
@@ -107,6 +128,10 @@ export interface AppEnvironment {
     enabled: boolean;
     lockTtlMs: number;
   };
+  recommendation: {
+    shadowModeEnabled: boolean;
+    shadowMinConfidence: number;
+  };
   news: {
     enabled: boolean;
     refreshCron: string;
@@ -123,12 +148,14 @@ export interface AppEnvironment {
     enabled: boolean;
     cron: string;
     lockTtlMs: number;
+    provider: RawEnvironment['RESEARCH_AGENT_PROVIDER'];
     model: string;
     timeoutMs: number;
     windowHours: number;
     maxArticles: number;
     briefTtlMinutes: number;
     promptVersion: string;
+    ollamaBaseUrl: string;
     openAiApiKey?: string;
   };
   notifications: {
@@ -145,7 +172,11 @@ export function validateEnvironment(values: Record<string, unknown>): RawEnviron
   if (!result.success) {
     throw new Error(`Invalid environment configuration: ${z.prettifyError(result.error)}`);
   }
-  if (result.data.RESEARCH_AGENT_ENABLED && !result.data.OPENAI_API_KEY) {
+  if (
+    result.data.RESEARCH_AGENT_ENABLED &&
+    result.data.RESEARCH_AGENT_PROVIDER === 'openai' &&
+    !result.data.OPENAI_API_KEY
+  ) {
     throw new Error(
       'Invalid environment configuration: OPENAI_API_KEY is required when RESEARCH_AGENT_ENABLED=true',
     );

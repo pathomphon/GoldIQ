@@ -54,4 +54,30 @@ describe('normalizeRssOrAtomFeed', () => {
 
     expect(articles.map((article) => article.externalId)).toEqual(['valid']);
   });
+
+  it('preserves an explicitly assigned secondary source tier', () => {
+    const articles = normalizeRssOrAtomFeed(
+      `<rss><channel><item>
+        <guid>intergold-1</guid>
+        <title>บทวิเคราะห์ราคาทองคำ</title>
+        <link>https://www.intergold.co.th/news_analysis/example/</link>
+        <description>จับตาค่าเงินบาทและราคาทองคำโลก</description>
+        <category><![CDATA[บทวิเคราะห์ราคาทองคำ]]></category>
+        <pubDate>Sun, 19 Jul 2026 09:30:00 GMT</pubDate>
+      </item><item>
+        <guid>intergold-video</guid>
+        <title>วิดีโอวิเคราะห์ทองคำ</title>
+        <link>https://www.intergold.co.th/news_analysis/video/</link>
+        <category><![CDATA[วิดีโอวิเคราะห์ทองคำ]]></category>
+        <pubDate>Sun, 19 Jul 2026 09:20:00 GMT</pubDate>
+      </item></channel></rss>`,
+      'INTERGOLD.CO.TH',
+      fetchedAt,
+      'SECONDARY',
+      'บทวิเคราะห์ราคาทองคำ',
+    );
+
+    expect(articles).toHaveLength(1);
+    expect(articles[0]?.sourceTier).toBe('SECONDARY');
+  });
 });

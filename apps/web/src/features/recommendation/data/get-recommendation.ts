@@ -11,7 +11,9 @@ function isRecommendation(value: unknown): value is Recommendation {
     typeof candidate.market === 'object' &&
     candidate.market !== null &&
     typeof candidate.settings === 'object' &&
-    candidate.settings !== null
+    candidate.settings !== null &&
+    typeof candidate.marketIntelligence === 'object' &&
+    candidate.marketIntelligence !== null
   );
 }
 

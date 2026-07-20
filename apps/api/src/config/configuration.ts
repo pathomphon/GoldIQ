@@ -53,13 +53,27 @@ export function configuration(): AppEnvironment {
       enabled: process.env.BUY_PLAN_ALERTS_ENABLED !== 'false',
       lockTtlMs: Number(process.env.BUY_PLAN_ALERT_LOCK_TTL_MS ?? 25_000),
     },
+    recommendation: {
+      shadowModeEnabled: process.env.RECOMMENDATION_SHADOW_MODE_ENABLED === 'true',
+      shadowMinConfidence: Number(process.env.RECOMMENDATION_SHADOW_MIN_CONFIDENCE ?? 0.4),
+    },
     news: {
       enabled: process.env.NEWS_ENABLED === 'true',
       refreshCron: process.env.NEWS_REFRESH_CRON ?? '0 */15 * * * *',
       refreshLockTtlMs: Number(process.env.NEWS_REFRESH_LOCK_TTL_MS ?? 120_000),
       sourceUrls: commaSeparated(
         process.env.NEWS_SOURCE_URLS,
-        'https://www.federalreserve.gov/feeds/press_all.xml',
+        [
+          'https://www.federalreserve.gov/feeds/press_all.xml',
+          'https://www.bls.gov/feed/cpi.rss',
+          'https://www.bls.gov/feed/empsit.rss',
+          'https://www.ecb.europa.eu/rss/press.html',
+          'https://www.cftc.gov/RSS/RSSGP/rssgp.xml',
+          'https://www.intergold.co.th/investor_core/feed/',
+          'https://www.finnomena.com/feed/?tag=gold',
+          'https://www.finnomena.com/fn3/api/gold/trader/present',
+          'https://www.finnomena.com/fn3/api/v2/gold/spot/historical/C:XAUUSD/prev',
+        ].join(','),
       ),
       requestTimeoutMs: Number(process.env.NEWS_REQUEST_TIMEOUT_MS ?? 10_000),
       requestMaxRetries: Number(process.env.NEWS_REQUEST_MAX_RETRIES ?? 2),
@@ -72,12 +86,16 @@ export function configuration(): AppEnvironment {
       enabled: process.env.RESEARCH_AGENT_ENABLED === 'true',
       cron: process.env.RESEARCH_AGENT_CRON ?? '0 5 * * * *',
       lockTtlMs: Number(process.env.RESEARCH_AGENT_LOCK_TTL_MS ?? 120_000),
+      provider:
+        (process.env.RESEARCH_AGENT_PROVIDER as AppEnvironment['researchAgent']['provider']) ??
+        'openai',
       model: process.env.RESEARCH_AGENT_MODEL ?? 'gpt-5.6-luna',
       timeoutMs: Number(process.env.RESEARCH_AGENT_TIMEOUT_MS ?? 45_000),
       windowHours: Number(process.env.RESEARCH_AGENT_WINDOW_HOURS ?? 168),
       maxArticles: Number(process.env.RESEARCH_AGENT_MAX_ARTICLES ?? 40),
       briefTtlMinutes: Number(process.env.RESEARCH_AGENT_BRIEF_TTL_MINUTES ?? 60),
-      promptVersion: process.env.RESEARCH_AGENT_PROMPT_VERSION ?? 'gold-research-v1',
+      promptVersion: process.env.RESEARCH_AGENT_PROMPT_VERSION ?? 'gold-research-v7-th-finnomena',
+      ollamaBaseUrl: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434',
       openAiApiKey: process.env.OPENAI_API_KEY || undefined,
     },
     notifications: {

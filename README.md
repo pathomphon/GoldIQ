@@ -25,6 +25,7 @@ repository นี้ทำเสร็จถึง **Phase 6: Recommendation Eng
 - ตั้งค่าโปรไฟล์ความเสี่ยง เงินสดสำรอง สัดส่วนจัดสรร เป้ากำไร สัดส่วนขาย และเพดานหยุดซื้อได้
 - Phase 7A News Intelligence ดึง RSS/Atom จากแหล่งปฐมภูมิที่อยู่ใน allowlist พร้อม normalize, hash deduplication, scheduler และ Redis lock
 - Phase 7B Gold Research Agent สร้าง market brief แบบ structured พร้อม citations, data confidence, bullish/bearish factors, risk flags และ unknowns
+- Phase 7C เชื่อม market brief เข้า Recommendation Engine แบบ conservative shadow mode โดยไม่เปลี่ยน live action หรือ override hard-risk rules
 - Phase 8 บันทึกการขายแบบผูกล็อต รองรับขายบางส่วน คำนวณ realized/unrealized P/L และ Win Rate จากล็อตที่ปิดแล้ว
 - Docker Compose สำหรับ web, API, PostgreSQL, Redis และ mock Hua Seng Heng API
 - unit, component และ HTTP integration tests
@@ -139,10 +140,22 @@ News Intelligence ปิดอยู่โดยค่าเริ่มต้�
 ระบบยอมรับเฉพาะ HTTPS feeds จาก allowlist ของหน่วยงานหลัก เช่น Federal Reserve,
 US Treasury, BLS, BEA, CFTC, Bank of Thailand และ ECB
 
-Gold Research Agent ปิดอยู่โดยค่าเริ่มต้น เปิดได้เมื่อกำหนด `OPENAI_API_KEY`
-และ `RESEARCH_AGENT_ENABLED=true` เท่านั้น Agent อ่านเฉพาะข่าวที่ระบบเก็บไว้,
+Gold Research Agent ปิดอยู่โดยค่าเริ่มต้น เปิดด้วย `RESEARCH_AGENT_ENABLED=true`
+และเลือก `RESEARCH_AGENT_PROVIDER=openai` (ต้องกำหนด `OPENAI_API_KEY`) หรือ
+`RESEARCH_AGENT_PROVIDER=ollama` พร้อม `OLLAMA_BASE_URL` สำหรับโมเดลในเครื่อง Agent อ่านเฉพาะข่าวที่ระบบเก็บไว้,
 ใช้ Structured Outputs, ตรวจ evidence IDs ซ้ำใน domain layer และไม่มีสิทธิ์แก้พอร์ต,
 Buy Plan, risk settings หรือสร้างคำสั่งซื้อขาย หากไม่มีข่าวใหม่ระบบจะไม่เรียกโมเดลซ้ำ
+
+### แหล่งอ้างอิงสำหรับการวิเคราะห์ทองคำ
+
+- แหล่งข้อมูลหลัก (`PRIMARY`): ข่าวและประกาศจากธนาคารกลางหรือหน่วยงานสถิติทางการ
+- แหล่งข้อมูลรอง (`SECONDARY`): บทวิเคราะห์ InterGold และ FINNOMENA
+- FINNOMENA ใช้ feed ข่าวแท็ก Gold พร้อมราคาอ้างอิงทองคำไทยและ Gold Spot จากหน้า
+  `https://www.finnomena.com/gold`
+- ราคา FINNOMENA ใช้เป็นหลักฐานประกอบ Research Agent เท่านั้น ราคาหลักสำหรับพอร์ต,
+  Buy Plan และ Alert ยังคงเป็นข้อมูลจากฮั่วเซ่งเฮง
+- ระบบเลือกเฉพาะ snapshot ราคา FINNOMENA ล่าสุดของแต่ละประเภทในแต่ละรอบวิเคราะห์
+  เพื่อไม่ให้ข้อมูลราคาซ้ำกลบข่าวและหลักฐานจากแหล่งอื่น
 
 ## Reliability
 
@@ -167,5 +180,6 @@ npm run verify
 
 ## ขอบเขตถัดไป
 
-Phase 7C จะเชื่อม market brief เข้า Recommendation Engine แบบ conservative shadow mode
-โดยข่าวจะไม่สามารถสร้าง BUY/SELL_PARTIAL หรือ override hard-risk rules ได้
+Phase 7C ทำงานแบบ conservative shadow mode: API ส่งทั้ง live action และ shadow action
+โดยข่าวจะลด BUY เป็น WAIT ได้เฉพาะในผลจำลอง แต่ไม่สามารถเปลี่ยน live action,
+สร้าง BUY/SELL_PARTIAL หรือ override hard-risk rules ได้

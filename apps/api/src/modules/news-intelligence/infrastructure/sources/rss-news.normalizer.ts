@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { XMLParser } from 'fast-xml-parser';
 
-import type { NormalizedNewsArticle } from '../../domain/news.types';
+import type { NewsSourceTier, NormalizedNewsArticle } from '../../domain/news.types';
 
 type XmlRecord = Record<string, unknown>;
 
@@ -42,6 +42,11 @@ function link(value: unknown): string | undefined {
     if (href && (!relation || relation === 'alternate')) return href;
   }
   return undefined;
+}
+
+function textValues(value: unknown): readonly string[] {
+  const candidates = Array.isArray(value) ? value : [value];
+  return candidates.map(text).filter((item): item is string => item !== undefined);
 }
 
 function cleanMarkup(value: unknown): string | null {
@@ -86,11 +91,15 @@ export function normalizeRssOrAtomFeed(
   xml: string,
   source: string,
   fetchedAt: Date,
+  sourceTier: NewsSourceTier = 'PRIMARY',
+  requiredCategory?: string,
 ): readonly NormalizedNewsArticle[] {
   const document = record(parser.parse(xml));
   if (!document) throw new Error(`Invalid XML document from ${source}`);
 
   return feedEntries(document).flatMap((entry) => {
+    if (requiredCategory && !textValues(entry.category).includes(requiredCategory)) return [];
+
     const title = cleanMarkup(entry.title);
     const rawUrl = link(entry.link);
     const canonicalUrl = rawUrl ? canonicalizeUrl(rawUrl) : undefined;
@@ -124,7 +133,7 @@ export function normalizeRssOrAtomFeed(
         canonicalUrl,
         title,
         excerpt,
-        sourceTier: 'PRIMARY' as const,
+        sourceTier,
         publishedAt,
         fetchedAt,
         rawHash,

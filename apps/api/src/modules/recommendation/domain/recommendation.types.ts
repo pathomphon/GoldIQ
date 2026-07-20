@@ -10,6 +10,25 @@ export const RECOMMENDATION_ACTIONS = [
 ] as const;
 export type RecommendationAction = (typeof RECOMMENDATION_ACTIONS)[number];
 
+export interface MarketBriefSignal {
+  readonly id: string;
+  readonly generatedAt: Date;
+  readonly stance: 'BULLISH' | 'NEUTRAL' | 'BEARISH';
+  readonly confidence: number;
+  readonly isStale: boolean;
+}
+
+export interface RecommendationMarketIntelligence {
+  readonly mode: 'SHADOW';
+  readonly enabled: boolean;
+  readonly status: 'DISABLED' | 'UNAVAILABLE' | 'STALE' | 'LOW_CONFIDENCE' | 'ACTIVE';
+  readonly effect: 'NO_CHANGE' | 'SUPPORTS' | 'CAUTION';
+  readonly baseAction: RecommendationAction;
+  readonly shadowAction: RecommendationAction;
+  readonly reasons: readonly string[];
+  readonly brief: MarketBriefSignal | null;
+}
+
 export interface RiskSettings {
   readonly riskProfile: RiskProfile;
   readonly availableCash: number;
@@ -49,4 +68,5 @@ export interface Recommendation {
   };
   readonly market: RecommendationContext;
   readonly settings: RiskSettings;
+  readonly marketIntelligence?: RecommendationMarketIntelligence;
 }

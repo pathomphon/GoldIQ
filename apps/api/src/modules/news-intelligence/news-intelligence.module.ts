@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
+import type { AppEnvironment } from '../../config/environment.schema';
 import { GetNewsService } from './application/get-news.service';
 import { GenerateMarketBriefService } from './application/generate-market-brief.service';
 import { GetLatestMarketBriefService } from './application/get-latest-market-brief.service';
@@ -12,6 +14,7 @@ import { NEWS_REPOSITORY_PORT } from './domain/news-repository.port';
 import { RssNewsProvider } from './infrastructure/sources/rss-news.provider';
 import { PrismaNewsRepository } from './infrastructure/persistence/prisma-news.repository';
 import { OpenAiNewsAnalyzerAdapter } from './infrastructure/analysis/openai-news-analyzer.adapter';
+import { OllamaNewsAnalyzerAdapter } from './infrastructure/analysis/ollama-news-analyzer.adapter';
 import { NewsIntelligenceController } from './presentation/news-intelligence.controller';
 
 @Module({
@@ -25,10 +28,20 @@ import { NewsIntelligenceController } from './presentation/news-intelligence.con
     MarketBriefScheduler,
     RssNewsProvider,
     OpenAiNewsAnalyzerAdapter,
+    OllamaNewsAnalyzerAdapter,
     PrismaNewsRepository,
     { provide: NEWS_PROVIDER_PORT, useExisting: RssNewsProvider },
-    { provide: NEWS_ANALYZER_PORT, useExisting: OpenAiNewsAnalyzerAdapter },
+    {
+      provide: NEWS_ANALYZER_PORT,
+      inject: [ConfigService, OpenAiNewsAnalyzerAdapter, OllamaNewsAnalyzerAdapter],
+      useFactory: (
+        config: ConfigService<AppEnvironment, true>,
+        openAi: OpenAiNewsAnalyzerAdapter,
+        ollama: OllamaNewsAnalyzerAdapter,
+      ) => (config.get('researchAgent.provider', { infer: true }) === 'ollama' ? ollama : openAi),
+    },
     { provide: NEWS_REPOSITORY_PORT, useExisting: PrismaNewsRepository },
   ],
+  exports: [GetLatestMarketBriefService],
 })
 export class NewsIntelligenceModule {}

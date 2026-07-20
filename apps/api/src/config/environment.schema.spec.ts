@@ -15,4 +15,13 @@ describe('Research Agent environment contract', () => {
       }),
     ).not.toThrow();
   });
+
+  it('does not require an OpenAI API key for the Ollama provider', () => {
+    expect(() =>
+      validateEnvironment({
+        RESEARCH_AGENT_ENABLED: 'true',
+        RESEARCH_AGENT_PROVIDER: 'ollama',
+      }),
+    ).not.toThrow();
+  });
 });

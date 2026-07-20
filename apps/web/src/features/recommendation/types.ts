@@ -1,5 +1,6 @@
 export type RiskProfile = 'CONSERVATIVE' | 'BALANCED' | 'AGGRESSIVE';
 export type RecommendationAction = 'BUY' | 'WAIT' | 'HOLD' | 'REVIEW_PROFIT' | 'SELL_PARTIAL';
+export type ShadowStatus = 'DISABLED' | 'UNAVAILABLE' | 'STALE' | 'LOW_CONFIDENCE' | 'ACTIVE';
 
 export interface RiskSettings {
   readonly riskProfile: RiskProfile;
@@ -38,6 +39,22 @@ export interface Recommendation {
     } | null;
   };
   readonly settings: RiskSettings;
+  readonly marketIntelligence: {
+    readonly mode: 'SHADOW';
+    readonly enabled: boolean;
+    readonly status: ShadowStatus;
+    readonly effect: 'NO_CHANGE' | 'SUPPORTS' | 'CAUTION';
+    readonly baseAction: RecommendationAction;
+    readonly shadowAction: RecommendationAction;
+    readonly reasons: readonly string[];
+    readonly brief: {
+      readonly id: string;
+      readonly generatedAt: string;
+      readonly stance: 'BULLISH' | 'NEUTRAL' | 'BEARISH';
+      readonly confidence: number;
+      readonly isStale: boolean;
+    } | null;
+  };
 }
 
 export interface RecommendationResult {

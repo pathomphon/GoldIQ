@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { AppEnvironment } from '../../../config/environment.schema';
+import { rankGoldResearchCandidates } from '../domain/gold-news-relevance';
 import { assertGroundedAnalysis, calculateDataConfidence } from '../domain/market-brief';
 import { NEWS_ANALYZER_PORT, type NewsAnalyzerPort } from '../domain/news-analyzer.port';
 import { NEWS_REPOSITORY_PORT, type NewsRepositoryPort } from '../domain/news-repository.port';
@@ -16,6 +17,7 @@ export class GenerateMarketBriefService {
   private readonly windowHours: number;
   private readonly maxArticles: number;
   private readonly briefTtlMinutes: number;
+  private readonly promptVersion: string;
 
   constructor(
     @Inject(NEWS_ANALYZER_PORT)
@@ -27,16 +29,22 @@ export class GenerateMarketBriefService {
     this.windowHours = config.get('researchAgent.windowHours', { infer: true });
     this.maxArticles = config.get('researchAgent.maxArticles', { infer: true });
     this.briefTtlMinutes = config.get('researchAgent.briefTtlMinutes', { infer: true });
+    this.promptVersion = config.get('researchAgent.promptVersion', { infer: true });
   }
 
   async execute(now = new Date()): Promise<GenerateMarketBriefResult> {
     const windowStart = new Date(now.getTime() - this.windowHours * 3_600_000);
-    const [articles, latest] = await Promise.all([
-      this.repository.findAnalysisCandidates(windowStart, this.maxArticles),
+    const candidateFetchLimit = Math.min(this.maxArticles * 5, 500);
+    const [unrankedArticles, latest] = await Promise.all([
+      this.repository.findAnalysisCandidates(windowStart, candidateFetchLimit),
       this.repository.findLatestBrief(),
     ]);
+    const articles = rankGoldResearchCandidates(unrankedArticles, this.maxArticles);
     if (articles.length === 0) return { status: 'SKIPPED_NO_EVIDENCE', brief: null };
-    if (latest && articles.every((article) => article.fetchedAt <= latest.generatedAt)) {
+    if (
+      latest?.promptVersion === this.promptVersion &&
+      articles.every((article) => article.fetchedAt <= latest.generatedAt)
+    ) {
       return { status: 'SKIPPED_NO_CHANGES', brief: null };
     }
 
