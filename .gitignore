@@ -12,3 +12,7 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
+.claude/
+.codex/
+.cursor/
+

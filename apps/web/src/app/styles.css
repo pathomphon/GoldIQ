@@ -1343,8 +1343,249 @@ footer i {
   font-variant-numeric: tabular-nums;
 }
 
+.buy-plan-container {
+  @apply flex flex-col gap-6 mt-6;
+}
+
+/* Insights Panel */
+.insights-panel {
+  @apply p-6 flex flex-col gap-5 transition-all duration-200;
+  background-color: var(--surface-card);
+  border: 1px solid var(--hairline-dark);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.insights-header {
+  @apply flex flex-wrap items-center justify-between gap-4 pb-4;
+  border-bottom: 1px solid var(--hairline-dark);
+}
+
+.insights-title-box {
+  @apply flex flex-col gap-1;
+}
+
+.insights-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.insights-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--on-dark);
+}
+
+.action-badge {
+  @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold;
+  border: 1px solid transparent;
+}
+
+.action-badge--buy {
+  background-color: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #4ade80;
+}
+
+.action-badge--wait {
+  background-color: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.3);
+  color: #facc15;
+}
+
+.action-badge--sell {
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.action-badge__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.indicators-row {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-3;
+}
+
+.indicator-chip {
+  @apply flex flex-col gap-1 p-3 rounded-lg;
+  background-color: var(--canvas);
+  border: 1px solid var(--hairline-dark);
+}
+
+.indicator-chip__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.indicator-chip__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-dark);
+}
+
+.insights-body {
+  @apply flex flex-col gap-2.5 pt-1;
+}
+
+.insights-subheading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--on-dark);
+}
+
+.insights-list {
+  @apply flex flex-col gap-2 text-xs leading-relaxed pl-4 list-disc;
+  color: var(--muted-strong);
+}
+
+.insights-list strong {
+  color: var(--on-dark);
+}
+
+/* Suggestion Panel */
+.suggestion-panel {
+  @apply p-6 flex flex-col gap-5 transition-all duration-200;
+  background-color: var(--surface-card);
+  border: 1px solid var(--hairline-dark);
+  border-radius: var(--radius-xl);
+}
+
+.suggestion-header {
+  @apply flex flex-wrap items-center justify-between gap-4 pb-4;
+  border-bottom: 1px solid var(--hairline-dark);
+}
+
+.suggestion-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.suggestion-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--on-dark);
+}
+
+.suggestion-price-box {
+  @apply flex items-center gap-6 p-3 rounded-lg;
+  background-color: var(--canvas);
+  border: 1px solid var(--hairline-dark);
+}
+
+.price-item {
+  @apply flex flex-col gap-0.5;
+}
+
+.price-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.price-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.suggestion-grid {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+}
+
+.suggestion-column {
+  @apply flex flex-col gap-3;
+}
+
+.column-heading {
+  @apply flex items-center gap-2 text-xs font-bold uppercase tracking-wider;
+  color: var(--muted-strong);
+}
+
+.target-list {
+  @apply flex flex-col gap-2.5;
+}
+
+.target-card {
+  @apply flex items-center justify-between p-3.5 rounded-lg border transition-all duration-150;
+  background-color: var(--canvas);
+}
+
+.target-card--buy {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.target-card--buy:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+  background-color: rgba(34, 197, 94, 0.04);
+}
+
+.target-card--sell {
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.target-card--sell:hover {
+  border-color: rgba(239, 68, 68, 0.4);
+  background-color: rgba(239, 68, 68, 0.04);
+}
+
+.target-card__info {
+  @apply flex flex-col gap-0.5;
+}
+
+.target-card__info strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-dark);
+}
+
+.target-card__info small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.target-card__price {
+  @apply flex flex-col items-end gap-0.5;
+}
+
+.target-card__price span {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.target-card__price strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.button--apply-suggestions {
+  @apply w-full py-2.5 px-4 text-xs font-bold rounded-lg transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer;
+  background: linear-gradient(135deg, rgba(252, 213, 53, 0.15), rgba(252, 213, 53, 0.05));
+  border: 1px solid rgba(252, 213, 53, 0.3);
+  color: var(--primary);
+}
+
+.button--apply-suggestions:hover {
+  background: linear-gradient(135deg, rgba(252, 213, 53, 0.25), rgba(252, 213, 53, 0.1));
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(252, 213, 53, 0.2);
+}
+
 .buy-plan-workspace {
-  @apply grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-8 mt-8 items-start;
+  @apply grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-8 mt-2 items-start;
 }
 
 .buy-level-form {
@@ -2416,3 +2657,117 @@ footer i {
   font-size: 12px;
   color: var(--muted);
 }
+
+/* Interactive Price Chart */
+.price-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--surface-card);
+  border: 1px solid var(--hairline-dark);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.price-chart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline-dark);
+}
+
+.chart-toggles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chart-hover-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--canvas);
+  border: 1px solid var(--hairline-dark);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+}
+
+.hover-time {
+  font-family: var(--font-mono);
+  color: var(--muted-strong);
+  font-weight: 600;
+}
+
+.hover-metrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hover-item strong {
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+}
+
+.price-chart-canvas-wrapper {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 8px;
+}
+
+.chart-legend .sell::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  background-color: #f87171;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.chart-legend .buy::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  background-color: #4ade80;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.chart-legend .resistance-legend::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  border-top: 2px dashed #f87171;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.chart-legend .support-legend::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  border-top: 2px dashed #4ade80;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+

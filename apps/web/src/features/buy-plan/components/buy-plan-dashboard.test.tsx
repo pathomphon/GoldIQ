@@ -41,7 +41,10 @@ describe('BuyPlanDashboard', () => {
       />,
     );
     expect(screen.getByRole('heading', { name: 'แผนแบ่งไม้ซื้อทอง' })).toBeInTheDocument();
+    expect(screen.getByText('ราคาแนะนำ ณ ปัจจุบัน')).toBeInTheDocument();
+    expect(screen.getByText('แนวทางการลงทุนและกลยุทธ์แบ่งไม้')).toBeInTheDocument();
     expect(screen.getByText('แผนหลัก')).toBeInTheDocument();
     expect(screen.getByText('เป้า ฿63,300')).toBeInTheDocument();
   });
 });
+

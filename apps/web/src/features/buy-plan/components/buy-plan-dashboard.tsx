@@ -70,7 +70,12 @@ export function BuyPlanDashboard({ result }: Readonly<{ result: BuyPlanDashboard
                   <strong>{result.dashboard.recentAlerts.length}</strong>
                 </article>
               </div>
-              <BuyPlanManager plans={result.dashboard.plans} />
+              <BuyPlanManager
+                analysis={result.analysis}
+                currentPrices={result.currentPrices}
+                plans={result.dashboard.plans}
+                recommendation={result.recommendation}
+              />
               <section className="alert-history" aria-labelledby="alert-history-title">
                 <div className="section-heading">
                   <div>

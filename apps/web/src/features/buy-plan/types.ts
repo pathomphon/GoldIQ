@@ -1,4 +1,6 @@
-import type { GoldProductCode } from '@/features/gold-price/types';
+import type { TechnicalAnalysis } from '@/features/analysis/types';
+import type { GoldPriceSnapshot, GoldProductCode } from '@/features/gold-price/types';
+import type { Recommendation } from '@/features/recommendation/types';
 
 export type BuyPlanLevelStatus = 'WAITING' | 'TRIGGERED' | 'EXECUTED' | 'CANCELLED';
 
@@ -37,7 +39,37 @@ export interface BuyPlanDashboardData {
   readonly recentAlerts: readonly AlertEvent[];
 }
 
+export interface BuyPriceSuggestion {
+  readonly sequence: number;
+  readonly targetPrice: number;
+  readonly discountAmount: number;
+  readonly discountPercent: number;
+  readonly investmentAmount: number;
+  readonly rationale: string;
+}
+
+export interface SellPriceSuggestion {
+  readonly sequence: number;
+  readonly targetPrice: number;
+  readonly profitAmount: number;
+  readonly profitPercent: number;
+  readonly rationale: string;
+}
+
+export interface PriceSuggestionsForProduct {
+  readonly productCode: GoldProductCode;
+  readonly productName: string;
+  readonly currentBuyPrice: number;
+  readonly currentSellPrice: number;
+  readonly buySuggestions: readonly BuyPriceSuggestion[];
+  readonly sellSuggestions: readonly SellPriceSuggestion[];
+}
+
 export interface BuyPlanDashboardResult {
   readonly dashboard: BuyPlanDashboardData;
+  readonly currentPrices?: readonly GoldPriceSnapshot[];
+  readonly recommendation?: Recommendation | null;
+  readonly analysis?: TechnicalAnalysis | null;
   readonly error: string | null;
 }
+

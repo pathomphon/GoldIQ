@@ -19,7 +19,7 @@ describe('SystemStatus', () => {
       />,
     );
 
-    expect(screen.getByRole('heading', { name: 'System foundation' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'System Status' })).toBeInTheDocument();
     expect(screen.getAllByText('Healthy')).toHaveLength(3);
     expect(screen.getByText('12 ms')).toBeInTheDocument();
   });
