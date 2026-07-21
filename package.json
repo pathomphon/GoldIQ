@@ -16,6 +16,7 @@
     "dev:api": "npm run dev --workspace @goldiq/api",
     "dev:web": "npm run dev --workspace @goldiq/web",
     "dev:mock": "npm run dev --workspace @goldiq/mock-hsh",
+    "tunnel": "ngrok http 3001",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "npm run lint --workspaces --if-present",

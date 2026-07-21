@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import type { AnalysisResult } from '@/features/analysis/types';
+import { PriceChart } from '@/features/analysis/components/price-chart';
 import { refreshGoldPrices } from '@/features/gold-price/data/refresh-gold-prices';
 import type { CurrentGoldPrices, GoldPriceSnapshot } from '@/features/gold-price/types';
 
 interface GoldPriceBoardProps {
   readonly prices: CurrentGoldPrices;
+  readonly analysis?: AnalysisResult | null;
 }
 
 const priceFormatter = new Intl.NumberFormat('th-TH', {
@@ -72,7 +75,7 @@ function PriceRow({ price }: Readonly<{ price: GoldPriceSnapshot }>) {
   );
 }
 
-export function GoldPriceBoard({ prices }: GoldPriceBoardProps) {
+export function GoldPriceBoard({ prices, analysis }: GoldPriceBoardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -196,6 +199,22 @@ export function GoldPriceBoard({ prices }: GoldPriceBoardProps) {
               ))}
             </div>
           )}
+
+          {analysis?.data?.samples && analysis.data.samples.length >= 2 ? (
+            <section aria-labelledby="home-chart-title" className="price-chart-section">
+              <div className="section-heading" style={{ marginBottom: '1.25rem' }}>
+                <div>
+                  <p className="eyebrow">TECHNICAL TREND</p>
+                  <h2 id="home-chart-title">แนวโน้มราคาทองคำแท่ง 96.5%</h2>
+                </div>
+              </div>
+              <PriceChart
+                resistance={analysis.data.resistance}
+                samples={analysis.data.samples}
+                support={analysis.data.support}
+              />
+            </section>
+          ) : null}
         </section>
       </main>
 
