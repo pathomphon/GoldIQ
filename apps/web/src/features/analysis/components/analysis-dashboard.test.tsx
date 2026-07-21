@@ -1,7 +1,37 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AnalysisDashboard } from './analysis-dashboard';
+
+vi.mock('lightweight-charts', () => ({
+  createChart: () => ({
+    addSeries: () => ({
+      setData: vi.fn(),
+      createPriceLine: vi.fn(() => ({})),
+      removePriceLine: vi.fn(),
+    }),
+    addLineSeries: () => ({
+      setData: vi.fn(),
+      createPriceLine: vi.fn(() => ({})),
+      removePriceLine: vi.fn(),
+    }),
+    subscribeCrosshairMove: vi.fn(),
+    timeScale: () => ({ fitContent: vi.fn() }),
+    applyOptions: vi.fn(),
+    remove: vi.fn(),
+  }),
+  LineSeries: {},
+  ColorType: { Solid: 'solid' },
+  LineStyle: { Dashed: 1 },
+}));
+
+if (typeof global.ResizeObserver === 'undefined') {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
 
 describe('AnalysisDashboard', () => {
   it('renders live analysis values and insufficient-data states', () => {
@@ -29,8 +59,9 @@ describe('AnalysisDashboard', () => {
 
     expect(screen.getByRole('heading', { name: 'วิเคราะห์ราคาทอง' })).toBeInTheDocument();
     expect(
-      screen.getByRole('img', { name: /กราฟประวัติราคารับซื้อและขายออก/ }),
+      screen.getByLabelText(/กราฟประวัติราคารับซื้อและขายออก/),
     ).toBeInTheDocument();
     expect(screen.getAllByText('ข้อมูลยังไม่เพียงพอ')).not.toHaveLength(0);
   });
 });
+

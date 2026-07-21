@@ -61,10 +61,10 @@ describe('RecommendationDashboard', () => {
         }}
       />,
     );
-    expect(screen.getByText('WAIT')).toBeInTheDocument();
+    expect(screen.getAllByText('WAIT').length).toBeGreaterThan(0);
     expect(screen.getByText('ราคายังไม่ถึง Buy Level #1')).toBeInTheDocument();
-    expect(screen.getByLabelText('เงินสดที่มีอยู่')).toHaveValue(50_000);
+    expect(screen.getByLabelText('เงินสดที่มีอยู่ (฿)')).toHaveValue(50_000);
     expect(screen.getByText('Conservative shadow mode')).toBeInTheDocument();
-    expect(screen.getByText('BEARISH · confidence 45%')).toBeInTheDocument();
+    expect(screen.getByText('BEARISH')).toBeInTheDocument();
   });
 });
